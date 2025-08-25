@@ -1,0 +1,29 @@
+Molnar, Christoph. Interpretable machine learning.2020.[Section 6-11]
+https://christophm.github.io/interpretable-ml-book/
+
+Explainable AI with Python Chapter "Intrinsic Explainable Models"
+https://link.springer.com/chapter/10.1007/978-3-030-68640-6_3 [Access through University Library]
+
+Lipton, Zachary C. "The mythos of model interpretability: In machine learning, the concept of
+interpretability is both important and slippery." Queue 16.3 (2018): 31-57.
+https://arxiv.org/abs/1606.03490
+
+Ribeiro, M. T., Singh, S., & Guestrin, C. (2016). “Why should I trust you?”: Explaining the predictions of any classifier. 
+arXiv. https://arxiv.org/abs/1602.04938
+
+Lundberg, S. M., & Lee, S.-I. (2017). A unified approach to interpreting model predictions. 
+arXiv. https://doi.org/10.48550/arXiv.1705.07874
+
+Fisher, Aaron, Cynthia Rudin, and Francesca Dominici. “All models are wrong, but many are useful:
+Learning a variable’s importance by studying an entire class of prediction models
+simultaneously.” http://arxiv.org/abs/1801.01489 (2018).
+
+Wei, Pengfei, Zhenzhou Lu, and Jingwen Song. “Variable importance analysis: a comprehensive review.”
+Reliability Engineering & System Safety 142 (2015): 399-432
+
+Kim, Been, Rajiv Khanna, and Oluwasanmi O. Koyejo. “Examples are not enough, learn to criticize!
+Criticism for interpretability.” Advances in Neural Information Processing Systems (2016). [Very
+mathematical]
+
+The talk is interesting:
+https://www.youtube.com/watch?v=bQfYRcXc9F0&ab_channel=MicrosoftResearch
