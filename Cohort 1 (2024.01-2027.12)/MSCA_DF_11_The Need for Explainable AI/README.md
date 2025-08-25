@@ -7,19 +7,22 @@ Session 01: White Box Models
 Recap of interpretable models. You will gain skills in understanding how transparency is built into these models and how to interpret their outputs.
 
 Session 02: Basic Explainability – Feature Importance, PDP, ICE
-Covers foundational explainability techniques including feature importance, partial dependence plots (PDP), and individual conditional expectation (ICE). You will learn to evaluate model behavior and interpret the influence of features.
+Covers foundational explainability techniques including feature importance, partial dependence plots (PDP), and individual conditional expectation (ICE). You will learn to evaluate model behavior and interpret the influence of features. 
 
 Session 03: SHAP and LIME Deep Dive
 Provides a detailed exploration of SHAP and LIME, two widely used model-agnostic explanation methods. It will examine how both methods approximate local feature attributions: SHAP through axiomatic fairness and coalition-based credit distribution (with implementations like KernelSHAP and TreeSHAP), and LIME through perturbed sampling and sparse linear regression. The session will critically compare their strengths and limitations also addressing computational trade-offs, approximation quality, and implications for explainability in high-stakes domains. During this session, we will engage in a variety of practical sessions, including a demonstration of a real-world project of implementing XAI for public employment services.
 
 Session 04: Deep Learning xAI
-Focuses on explainability in the context of neural networks. You will explore techniques designed for deep models and develop skills to interpret complex architectures.
+Focuses on explainability in the context of neural networks. You will explore techniques designed for deep models and develop skills to interpret complex architectures. 
 
 Session 05: Time-Series based xAI Methods
-Introduces explainability methods tailored for sequential and time-series data. You will gain skills in understanding temporal dependencies and interpreting models used in forecasting and sequence analysis.
+Introduces explainability methods tailored for sequential and time-series data. You will gain skills in understanding temporal dependencies and interpreting models used in forecasting and sequence analysis. 
 
-Session 06: Research – SAFE AI
-Presents ongoing research directions in safe and responsible AI, highlighting challenges, methodologies, and open questions. You will gain insights into the state of the art and develop critical reflection skills useful for your own research.
+Session 06: Research – In this session, you will hear a series of research talks showcasing cutting-edge work in explainable AI. 
+- SAFE AI - Presents ongoing research directions in safe and responsible AI, highlighting challenges, methodologies, and open questions. You will gain insights into the state of the art and develop critical reflection skills useful for your own research.
+- A Systematic Literature Review of XAI: Process, Challenges, and Insights
+- Explainable AI for Anomaly Detection in Electricity Prices: Insights from the Romanian Market
+- Practical session on XRL: a live demo will illustrate how to train a simple portfolio allocation agent, generate feature attributions, and distil its behaviour into an interpretable model. 
 
 Practical Aspects
 
