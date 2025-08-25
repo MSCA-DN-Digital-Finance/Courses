@@ -29,5 +29,3 @@ Practical Aspects
 - Each session will include hands-on practicals, where you will work on implementations.
 
 - All practicals will be carried out using Google Colab, so you will need a Gmail account.
-
-- We will use Google Classrooms so that each participant has their own working version of the practicals.
