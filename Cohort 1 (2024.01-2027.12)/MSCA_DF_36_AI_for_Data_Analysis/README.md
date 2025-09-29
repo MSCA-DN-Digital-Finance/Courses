@@ -67,6 +67,13 @@ Note: If you prefer another IDE (e.g. PyCharm), you can skip this step.
 
 ---
 
+## 📚 Reading Material
+
+- There is a free book on "Coding with AI" from Prof. Guido Salvaneschi at University of St. Gallen, which can be a good starting point for the topic we will cover in this course: [https://github.com/prg-grp/coding-with-ai/blob/main/markdown-version/table_of_contents.md](https://github.com/prg-grp/coding-with-ai/blob/main/markdown-version/table_of_contents.md)
+
+
+---
+
 ## 💡 Important Notes
 
 - **Troubleshooting** is part of the course: we expect some installation problems, and solving them is a learning exercise.  
