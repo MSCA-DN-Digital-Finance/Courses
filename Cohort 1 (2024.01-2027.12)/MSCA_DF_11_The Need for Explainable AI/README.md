@@ -18,11 +18,11 @@ Focuses on explainability in the context of neural networks. You will explore te
 Session 05: Time-Series based xAI Methods
 Introduces explainability methods tailored for sequential and time-series data. You will gain skills in understanding temporal dependencies and interpreting models used in forecasting and sequence analysis. 
 
-Session 06: Research – In this session, you will hear a series of research talks showcasing cutting-edge work in explainable AI. 
+Session 06-08: Research – In this session, you will hear a series of research talks showcasing cutting-edge work in explainable AI. 
 - SAFE AI - Presents ongoing research directions in safe and responsible AI, highlighting challenges, methodologies, and open questions. You will gain insights into the state of the art and develop critical reflection skills useful for your own research.
 - A Systematic Literature Review of XAI: Process, Challenges, and Insights
-- Explainable AI for Anomaly Detection in Electricity Prices: Insights from the Romanian Market
-- Practical session on XRL: a live demo will illustrate how to train a simple portfolio allocation agent, generate feature attributions, and distil its behaviour into an interpretable model. 
+- Practical session on XRL: a live demo will illustrate how to train a simple portfolio allocation agent, generate feature attributions, and distil its behaviour into an interpretable model.
+- Explainability & Intelligence 
 
 Practical Aspects
 
