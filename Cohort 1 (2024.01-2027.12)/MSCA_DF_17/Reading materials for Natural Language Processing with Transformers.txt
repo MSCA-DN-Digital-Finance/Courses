@@ -1,0 +1,7 @@
+Detailed course materials will be made available in the following period. Indicative material included:
+●	Vaswani et al., “Attention Is All You Need” (2017).
+●	Speech and Language Processing by Jurafsky & Martin (3rd Edition Draft).
+●	Ian Goodfellow, Yoshua Bengio, Aaron Courville, “Deep Learning” (Adaptive Computation and Machine Learning series), MIT Press, 2016
+●	François Chollet, “Deep Learning with Python”, Manning Publications, 2017, 2021
+●	Ian Pointer, “Programming PyTorch for Deep Learning: Creating and Deploying Deep Learning Applications”, Oreilly Media, 2019
+●	Selected papers on RAG, NLP-to-SQL, and LLM evaluation (shared before the course).
