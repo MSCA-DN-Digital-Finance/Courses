@@ -5,20 +5,23 @@ Instructor: Barbara Będowska-Sójka, Poznań University of Economics and Busine
 
 A one-day online training for doctoral candidates. We read published papers as research designs: the question and the hypothesis, the data, the validation, the economic evaluation, robustness and replication. For each block we rebuild the core of the design in a Python notebook that runs in class.
 
-Before the course this folder holds the notebooks, the data we may share, the paper cards and the reading list. The slides follow after the course.
+This folder holds the slides, the notebooks, the data we may share, the paper cards, the reading list and the programme.
 
 ## Contents
 
 | File or folder | What it holds |
 |---|---|
+| `slides/` | one deck per block, as Marp Markdown and as PDF |
+| `Programme.pdf` | the timetable of the day and how the class worked |
 | `Paper_cards.pdf` | one slide per paper: question, data, method, test, result, what to watch for |
-| `Reading_list.pdf` | the 15 papers of the day, with links |
+| `Reading_list.pdf` | the papers of the day, with links |
 | `notebooks/` | the notebooks we run in class (outputs cleared) |
 | `scripts/` | scripts that precompute the slow steps |
 | `data/` | the public data the notebooks use (sources below) and the download scripts |
 | `data/cache/` | precomputed results, so each live notebook runs in under two minutes |
 | `experiments/` | where to put the cryptocurrency data for notebook `05` |
-| `slides/` | the slides, after the course |
+| `requirements.txt` | the Python packages the notebooks need |
+| `LICENSE` | MIT, for the code |
 
 ## The day
 
@@ -31,6 +34,7 @@ Before the course this folder holds the notebooks, the data we may share, the pa
 | A+ | Economics inside the loss | Chen, Pelger & Zhu (2024) | `04_chen_pelger_zhu_sketch` (homework) |
 | D | Replication and robustness | Harvey, Liu & Zhu (2016); Jensen, Kelly & Pedersen (2023); Kelly, Malamud & Zhou (2024); Nagel (2025) | `06_kmz_nagel` |
 | E | Replication from the author's side | Będowska-Sójka, Wójcik & Pele (2025) | `05_crypto_zombies_csv_only` |
+| Extra | Machine learning and the cross-section of cryptocurrency returns (not in the timetable) | Cakici, Shahzad, Będowska-Sójka & Zaremba (2024) | `07_cakici_crypto_ml` |
 
 Full references are in `Reading_list.pdf` and in `../Reading materials for Introduction to AI for Financial Applications.txt`.
 
@@ -58,7 +62,7 @@ Open the notebooks from `notebooks/` and run all cells. The first run in a new e
 | Give Me Some Credit | `03` | no: Kaggle competition data | download `cs-training.csv` from Kaggle into `data/gmc/`, then run `python scripts/precompute_gmc.py`. Without it, the lab runs on the two UCI data sets |
 | Welch–Goyal monthly predictors, 2025 release | `06` | yes | Amit Goyal's website |
 | Weekly cryptocurrency snapshots | `05` | no (about 1 GB) | QuantLet, Crypto_Zombies; `experiments/crypto_zombies_runbook.txt` says where to put `all_symbols.csv` |
-| Synthetic panels | `01a`, `01b`, `04`, `03_invoice` | generated in the notebooks | none |
+| Synthetic panels | `01a`, `01b`, `04`, `03_invoice`, `07` | generated in the notebooks | none |
 
 Each data set keeps its own licence or terms of use. Please cite the original sources.
 
