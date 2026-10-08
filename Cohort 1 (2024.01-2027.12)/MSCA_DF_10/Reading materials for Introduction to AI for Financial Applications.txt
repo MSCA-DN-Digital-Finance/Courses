@@ -1,0 +1,49 @@
+Reading materials for Introduction to AI for Financial Applications
+
+Machine Learning in Finance: deconstructing published papers (Barbara Będowska-Sójka)
+
+Paper cards (one slide per paper): Day 4 - Machine Learning in Finance/Paper_cards.pdf. Suggested pre-reading: Mullainathan & Spiess (2017); Gu, Kelly & Xiu (2020), Sections 1–2.1 and Table 1.
+
+Opener: prediction vs inference
+Mullainathan, S., & Spiess, J. (2017). Machine learning: An applied econometric approach. Journal of Economic Perspectives, 31(2), 87-106.
+URL: https://doi.org/10.1257/jep.31.2.87
+
+Block A: factor models, ML forecasts of returns, and who earns the alpha
+Fama, E. F., & French, K. R. (2015). A five-factor asset pricing model. Journal of Financial Economics, 116(1), 1-22.
+URL: https://doi.org/10.1016/j.jfineco.2014.10.010
+Gu, S., Kelly, B., & Xiu, D. (2020). Empirical asset pricing via machine learning. Review of Financial Studies, 33(5), 2223-2273.
+URL: https://doi.org/10.1093/rfs/hhaa009
+Avramov, D., Cheng, S., & Metzker, L. (2023). Machine learning vs. economic restrictions: Evidence from stock return predictability. Management Science, 69(5), 2587-2619.
+URL: https://doi.org/10.1287/mnsc.2022.4449
+
+Block B: classification, portfolios and frictions
+Krauss, C., Do, X. A., & Huck, N. (2017). Deep neural networks, gradient-boosted trees, random forests: Statistical arbitrage on the S&P 500. European Journal of Operational Research, 259(2), 689-702.
+URL: https://doi.org/10.1016/j.ejor.2016.10.031
+
+Block C: credit and the benchmark protocol
+Lessmann, S., Baesens, B., Seow, H.-V., & Thomas, L. C. (2015). Benchmarking state-of-the-art classification algorithms for credit scoring: An update of research. European Journal of Operational Research, 247(1), 124-136.
+URL: https://doi.org/10.1016/j.ejor.2015.05.030
+Gunnarsson, B. R., vanden Broucke, S., Baesens, B., Óskarsdóttir, M., & Lemahieu, W. (2021). Deep learning for credit scoring: Do or don't? European Journal of Operational Research, 295(1), 292-305.
+URL: https://www.sciencedirect.com/science/article/abs/pii/S037722172100196X
+Fuster, A., Goldsmith-Pinkham, P., Ramadorai, T., & Walther, A. (2022). Predictably unequal? The effects of machine learning on credit markets. Journal of Finance, 77(1), 5-47.
+URL: https://doi.org/10.1111/jofi.13090
+Exercise: Zeng, S., Melville, P., Lang, C. A., Boier-Martin, I., & Murphy, C. (2008). Using predictive analysis to improve invoice-to-cash collection. Proceedings of the 14th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, 1043-1050.
+URL: https://doi.org/10.1145/1401890.1402014
+
+Block A+: economics inside the loss
+Chen, L., Pelger, M., & Zhu, J. (2024). Deep learning in asset pricing. Management Science, 70(2), 714-750.
+URL: https://doi.org/10.1287/mnsc.2023.4695
+
+Block D: replication and robustness
+Harvey, C. R., Liu, Y., & Zhu, H. (2016). ... and the cross-section of expected returns. Review of Financial Studies, 29(1), 5-68.
+URL: https://doi.org/10.1093/rfs/hhv059
+Jensen, T. I., Kelly, B., & Pedersen, L. H. (2023). Is there a replication crisis in finance? Journal of Finance, 78(5), 2465-2518.
+URL: https://doi.org/10.1111/jofi.13249
+Kelly, B., Malamud, S., & Zhou, K. (2024). The virtue of complexity in return prediction. Journal of Finance, 79(1), 459-503.
+URL: https://doi.org/10.1111/jofi.13298
+Nagel, S. (2025). Seemingly virtuous complexity in return prediction. NBER Working Paper 34104.
+URL: https://www.nber.org/papers/w34104
+
+Block E: replication from the author's side
+Będowska-Sójka, B., Wójcik, P., & Pele, D. T. (2025). Early warning systems for cryptocurrency markets: Predicting "zombie" assets using machine learning. North American Journal of Economics and Finance, 81, 102543.
+URL: https://doi.org/10.1016/j.najef.2025.102543

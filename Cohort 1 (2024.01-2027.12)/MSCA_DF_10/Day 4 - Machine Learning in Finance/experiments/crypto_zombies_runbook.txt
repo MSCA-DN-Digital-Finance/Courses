@@ -1,0 +1,39 @@
+# Crypto Zombies — classroom runbook
+
+**Paper:** Będowska-Sójka, Wójcik, Pele (NAJEF) · DOI [10.1016/j.najef.2025.102543](https://doi.org/10.1016/j.najef.2025.102543)
+
+The QuantLet clone (`experiments/Crypto_Zombies/`) and the ~960 MB CSV are **local only** — not on GitHub. See also [`START.md`](../START.md).
+
+## Classroom path
+
+**No aux xlsx required.**
+
+| Item | Path |
+|------|------|
+| Live notebook | `notebooks/05_crypto_zombies_csv_only.ipynb` |
+| Data | `experiments/Crypto_Zombies/workdir/_cryptos_weekly_snapshots/all_symbols.csv` |
+| Session | `sessions/05_crypto_zombies.md` |
+| Slides | `slides/05_crypto_zombies.md` |
+| Upstream | [QuantLet/Crypto_Zombies](https://github.com/QuantLet/Crypto_Zombies) |
+
+From repo root:
+
+```bash
+source .venv/bin/activate
+jupyter notebook notebooks/05_crypto_zombies_csv_only.ipynb
+```
+
+Smoke metrics on one OOT window (indicative): RF balanced accuracy ≈ 0.83 vs Logit ≈ 0.67.
+
+## Unpack the public RAR
+
+1. Clone or download [QuantLet/Crypto_Zombies](https://github.com/QuantLet/Crypto_Zombies) into `experiments/Crypto_Zombies/` (or copy the RAR there).
+2. Unpack **`part01.rar` only** (The Unarchiver / `unrar`) so this file exists:
+
+   `experiments/Crypto_Zombies/workdir/_cryptos_weekly_snapshots/all_symbols.csv`
+
+The notebook walks up from `notebooks/` to the repo root, so Jupyter’s cwd does not matter.
+
+## What we skip live
+
+Full QuantLet `Code/*.R` needs aux xlsx files **not** in the public RAR. Optional / author machine only.
