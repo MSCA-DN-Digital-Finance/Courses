@@ -1,0 +1,20 @@
+# Python packages for the course labs (Python >= 3.10)
+# install with:  pip install -r requirements.txt
+geopandas>=0.14
+pyogrio
+shapely>=2.0
+pyproj
+pandas
+numpy
+scipy
+matplotlib
+mapclassify
+libpysal>=4.9
+esda>=2.5
+spreg>=1.4
+scikit-learn
+pillow
+# Lab 5 (spatial big data)
+h3>=4.0
+duckdb
+pyarrow

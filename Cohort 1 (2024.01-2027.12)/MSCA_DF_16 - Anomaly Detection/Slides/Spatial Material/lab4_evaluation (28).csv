@@ -1,0 +1,4 @@
+"method","precision","recall","F1","false_alarms"
+"Temporal (EARS-like)",0.023,0.028,0.025,388
+"Space-time Gi*",0.112,0.137,0.123,348
+"ST permutation scan",0.779,0.891,0.831,81
