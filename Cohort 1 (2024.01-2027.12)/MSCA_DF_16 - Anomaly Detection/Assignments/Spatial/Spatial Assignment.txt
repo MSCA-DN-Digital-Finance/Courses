@@ -15,4 +15,4 @@ python/01 ... 04_*.py
 R/00_common.R
 R/01 ... 04_*.R
 data/  figures/  outputs/
-README.md: setup, run times, exercises
+README.md
