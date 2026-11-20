@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="850.087656pt" height="269.443125pt" viewBox="0 0 850.087656 269.443125" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-27T18:04:49.710767</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.9, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 269.443125 
+L 850.087656 269.443125 
+L 850.087656 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 174.727656 227.52 
+L 844.327656 227.52 
+L 844.327656 5.76 
+L 174.727656 5.76 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 174.727656 217.44 
+L 212.295118 217.44 
+L 212.295118 190.385455 
+L 174.727656 190.385455 
+z
+" clip-path="url(#pf074754ac7)" style="fill: #1f5fd6"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 174.727656 173.803636 
+L 220.577971 173.803636 
+L 220.577971 146.749091 
+L 174.727656 146.749091 
+z
+" clip-path="url(#pf074754ac7)" style="fill: #9aa9c2"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 174.727656 130.167273 
+L 260.795907 130.167273 
+L 260.795907 103.112727 
+L 174.727656 103.112727 
+z
+" clip-path="url(#pf074754ac7)" style="fill: #d6334a"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 174.727656 86.530909 
+L 344.611947 86.530909 
+L 344.611947 59.476364 
+L 174.727656 59.476364 
+z
+" clip-path="url(#pf074754ac7)" style="fill: #9aa9c2"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 174.727656 42.894545 
+L 710.523621 42.894545 
+L 710.523621 15.84 
+L 174.727656 15.84 
+z
+" clip-path="url(#pf074754ac7)" style="fill: #5b6f8f"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <defs>
+       <path id="md787c1ab40" d="M 0 0 
+L 0 3.5 
+" style="stroke: #5b6f8f; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#md787c1ab40" x="174.727656" y="227.52" style="fill: #5b6f8f; stroke: #5b6f8f; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 13px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: middle; fill: #5b6f8f" x="174.727656" y="244.397969" transform="rotate(-0 174.727656 244.397969)">0</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2">
+      <g>
+       <use xlink:href="#md787c1ab40" x="298.727656" y="227.52" style="fill: #5b6f8f; stroke: #5b6f8f; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 13px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: middle; fill: #5b6f8f" x="298.727656" y="244.397969" transform="rotate(-0 298.727656 244.397969)">50</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_3">
+      <g>
+       <use xlink:href="#md787c1ab40" x="422.727656" y="227.52" style="fill: #5b6f8f; stroke: #5b6f8f; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 13px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: middle; fill: #5b6f8f" x="422.727656" y="244.397969" transform="rotate(-0 422.727656 244.397969)">100</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#md787c1ab40" x="546.727656" y="227.52" style="fill: #5b6f8f; stroke: #5b6f8f; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 13px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: middle; fill: #5b6f8f" x="546.727656" y="244.397969" transform="rotate(-0 546.727656 244.397969)">150</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_5">
+      <g>
+       <use xlink:href="#md787c1ab40" x="670.727656" y="227.52" style="fill: #5b6f8f; stroke: #5b6f8f; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 13px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: middle; fill: #5b6f8f" x="670.727656" y="244.397969" transform="rotate(-0 670.727656 244.397969)">200</text>
+     </g>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#md787c1ab40" x="794.727656" y="227.52" style="fill: #5b6f8f; stroke: #5b6f8f; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_6">
+      <text style="font-size: 13px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: middle; fill: #5b6f8f" x="794.727656" y="244.397969" transform="rotate(-0 794.727656 244.397969)">250</text>
+     </g>
+    </g>
+    <g id="text_7">
+     <text style="font-size: 13px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: middle; fill: #0b2545" x="509.527656" y="260.979531" transform="rotate(-0 509.527656 260.979531)">total cost on the test set (H1 2020), thousand $  ·  review = $15, missed fraud = its amount</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_7"/>
+     <g id="text_8">
+      <text style="font-size: 13px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: end; fill: #0b2545" x="171.227656" y="208.851712" transform="rotate(-0 171.227656 208.851712)">calibrated p + Bayes rule</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_8"/>
+     <g id="text_9">
+      <text style="font-size: 13px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: end; fill: #0b2545" x="171.227656" y="165.215348" transform="rotate(-0 171.227656 165.215348)">cost-optimal threshold</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_9"/>
+     <g id="text_10">
+      <text style="font-size: 13px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: end; fill: #0b2545" x="171.227656" y="121.578984" transform="rotate(-0 171.227656 121.578984)">F1-optimal threshold</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_10"/>
+     <g id="text_11">
+      <text style="font-size: 13px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: end; fill: #0b2545" x="171.227656" y="77.942621" transform="rotate(-0 171.227656 77.942621)">threshold 0.5</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_11"/>
+     <g id="text_12">
+      <text style="font-size: 13px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: end; fill: #0b2545" x="171.227656" y="34.306257" transform="rotate(-0 171.227656 34.306257)">approve everything</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_8">
+    <path d="M 174.727656 227.52 
+L 844.327656 227.52 
+" style="fill: none; stroke: #d4dff0; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_13">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: start; fill: #0b2545" x="218.495118" y="207.361946" transform="rotate(-0 218.495118 207.361946)">$15.1k  ·  632 alerts</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 12.5px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: start; fill: #0b2545" x="226.777971" y="163.725582" transform="rotate(-0 226.777971 163.725582)">$18.5k  ·  552 alerts</text>
+   </g>
+   <g id="text_15">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: start; fill: #0b2545" x="266.995907" y="120.089219" transform="rotate(-0 266.995907 120.089219)">$34.7k  ·  337 alerts</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 12.5px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: start; fill: #0b2545" x="350.811947" y="76.452855" transform="rotate(-0 350.811947 76.452855)">$68.5k  ·  224 alerts</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 12.5px; font-family: 'Segoe UI', 'DejaVu Sans'; text-anchor: start; fill: #0b2545" x="716.723621" y="32.816491" transform="rotate(-0 716.723621 32.816491)">$216.0k  ·  0 alerts</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pf074754ac7">
+   <rect x="174.727656" y="5.76" width="669.6" height="221.76"/>
+  </clipPath>
+ </defs>
+</svg>

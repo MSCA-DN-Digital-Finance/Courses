@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fraud Detection — Module 2 (MSCA)</title>
+<style>
+  :root{
+    --bg:#ffffff; --bg2:#eaf1fb; --panel:#f3f7fd; --panel2:#f7faff;
+    --ink:#0b2545; --muted:#5b6f8f; --line:#d4dff0;
+    --trace:#1f5fd6;      /* normal signal */
+    --alarm:#d6334a;      /* anomaly / alarm */
+    --amber:#b9770e;      /* threshold / attention */
+    --display:"Bahnschrift","DIN Next","Segoe UI Variable Display",system-ui,sans-serif;
+    --body:"Segoe UI","Segoe UI Variable Text",system-ui,Arial,sans-serif;
+    --mono:"Consolas","Cascadia Mono",ui-monospace,monospace;
+    --fs:clamp(18px,2.6vh,35px);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--ink);
+    font-family:var(--body);overflow:hidden}
+  #deck{position:fixed;inset:0}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;
+    justify-content:flex-start;padding:15vh 6.5vw 9vh;opacity:0;transition:opacity .22s ease}
+  .slide.active{display:flex;opacity:1}
+  h1{font-family:var(--display);font-weight:600;font-size:calc(var(--fs)*2.7);
+    line-height:1;letter-spacing:.3px}
+  h2{font-family:var(--display);font-weight:600;font-size:calc(var(--fs)*1.7);
+    line-height:1.08;margin-bottom:3vh;position:relative;padding-bottom:1.2vh}
+  h2::after{content:"";position:absolute;left:0;bottom:0;width:3.2em;height:3px;border-radius:2px;background:var(--trace)}
+  h3{font-family:var(--display);font-weight:600;font-size:calc(var(--fs)*1.05);
+    color:var(--trace);margin:1.4vh 0 .5vh;letter-spacing:.2px}
+  p,li{font-size:var(--fs);line-height:1.46;max-width:58ch}
+  .muted{color:var(--muted)}
+  ul{list-style:none;display:flex;flex-direction:column;gap:1vh}
+  li{padding-left:1.4em;position:relative}
+  li::before{content:"";position:absolute;left:.15em;top:.55em;width:.5em;height:.5em;
+    border-radius:50%;background:var(--trace);box-shadow:0 0 0 3px #dbe7fb}
+  .chan{font-family:var(--body);color:var(--trace);font-weight:700;font-size:calc(var(--fs)*.66);
+    letter-spacing:.1em;text-transform:uppercase;margin-bottom:.8vh}
+  .chan b{color:var(--muted);font-weight:500;letter-spacing:.06em}
+  .two{display:grid;grid-template-columns:1.08fr .92fr;gap:4vw;align-items:start}
+  .lit li{font-size:calc(var(--fs)*.9);line-height:1.38}
+  .lit h3{margin-bottom:1.2vh}
+  .panel{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--trace);
+    box-shadow:0 2px 8px rgba(11,37,69,.05);border-radius:10px;padding:2.2vh 1.8vw}
+  .panel.alarm{border-top-color:var(--alarm)}
+  .panel.amber{border-top-color:var(--amber)}
+  .panel p{font-size:calc(var(--fs)*.88)}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4vw}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2vw}
+  .grid4 .panel p{font-size:calc(var(--fs)*.78)}
+  .big{font-size:calc(var(--fs)*1.12)}
+  .divider{justify-content:center;padding:12vh 6.5vw 9vh}
+  .divider h1{color:var(--ink);max-width:24ch}
+  .divider .num{font-family:var(--body);font-weight:700;color:var(--trace);text-transform:uppercase;
+    font-size:calc(var(--fs)*.78);letter-spacing:.14em;margin-bottom:1.6vh}
+  .divider .sec{font-family:var(--display);font-weight:700;font-size:calc(var(--fs)*6.5);line-height:.85;
+    color:transparent;-webkit-text-stroke:2px var(--trace);margin-bottom:2.4vh;letter-spacing:.02em}
+  .divider .rule{width:4.5em;height:4px;border-radius:2px;background:var(--trace);margin-bottom:2.4vh}
+  .cover{padding-left:9vw}
+  .cover::before{content:"";position:absolute;left:0;top:0;bottom:0;width:1.1vw;background:var(--trace)}
+  .cover::after{content:"";position:absolute;left:1.1vw;top:0;bottom:0;width:.35vw;background:#9fbdf0}
+  table{border-collapse:collapse;width:100%;font-size:calc(var(--fs)*.78)}
+  th,td{border:1px solid var(--line);padding:.7vh .8vw;text-align:left;vertical-align:top}
+  th{background:var(--bg2);color:var(--trace);font-weight:600;font-family:var(--display)}
+  td.map{color:var(--amber);font-weight:600}
+  td.num{font-family:var(--mono);text-align:right}
+  td.win{color:var(--trace);font-weight:600}
+  td.lose{color:var(--alarm)}
+  math{font-size:1.06em;color:var(--ink)}
+  math.eq{display:block;font-size:1.75em;margin:1vh 0 .5vh;color:var(--amber)}
+  .small{font-size:calc(var(--fs)*.76);color:var(--muted)}
+  .tag{display:inline-block;padding:.12em .6em;border-radius:3px;
+    font-size:.82em;font-weight:600;font-family:var(--mono)}
+  .t-pt{background:#fde6ea;color:var(--alarm)}
+  .t-ctx{background:#fbf1dc;color:var(--amber)}
+  .t-col{background:#e3edfc;color:var(--trace)}
+  .src{font-family:var(--mono);font-size:calc(var(--fs)*.6);color:var(--muted);margin-top:1.6vh;letter-spacing:.04em}
+  /* roadmap */
+  .road{display:grid;grid-template-columns:repeat(3,1fr);gap:1vw;margin-top:1vh}
+  .mod{background:var(--panel2);border-top:3px solid var(--line);border-radius:4px;
+    padding:1.8vh 1vw;position:relative}
+  .mod .mn{font-family:var(--mono);color:var(--muted);font-size:calc(var(--fs)*.7)}
+  .mod h4{font-family:var(--display);font-size:calc(var(--fs)*.92);margin:.6vh 0;line-height:1.1}
+  .mod p{font-size:calc(var(--fs)*.72);color:var(--muted);line-height:1.35}
+  .mod.today{border-top-color:var(--amber);background:#e6efff}
+  .mod.today .mn{color:var(--amber)}
+  .mod.done{opacity:.6}
+  .todaytag{position:absolute;top:-1.1em;right:.6vw;font-family:var(--mono);
+    font-size:calc(var(--fs)*.62);color:var(--amber);letter-spacing:.1em}
+  /* interactive */
+  .interactive{margin-top:1vh}
+  canvas{width:100%;height:auto;background:#fbfdff;border:1px solid var(--line);
+    border-radius:4px;display:block}
+  .controls{display:flex;align-items:center;gap:1.2vw;margin-top:1.4vh;flex-wrap:wrap}
+  .controls label{font-family:var(--mono);font-size:calc(var(--fs)*.72);color:var(--muted)}
+  input[type=range]{accent-color:var(--amber);height:3px;width:min(22vw,300px)}
+  .readout{font-family:var(--mono);font-size:calc(var(--fs)*.78);margin-top:1.2vh;
+    display:flex;gap:1.4vw;flex-wrap:wrap}
+  .readout b{color:var(--ink);font-weight:600}
+  .readout .k{color:var(--muted)}
+  .good{color:var(--trace)} .bad{color:var(--alarm)} .amb{color:var(--amber)}
+  button.ui{font-family:var(--body);font-size:calc(var(--fs)*.76);cursor:pointer;
+    background:var(--bg2);color:var(--ink);border:1px solid var(--line);
+    border-radius:4px;padding:.45em .9em}
+  button.ui.on{background:var(--amber);color:#ffffff;border-color:var(--amber);font-weight:600}
+  .vstack{display:flex;flex-direction:column;gap:.8vh}
+  .sl{display:grid;grid-template-columns:9em 1fr 6em;align-items:center;gap:.8vw}
+  .sl label{font-family:var(--mono);font-size:calc(var(--fs)*.7);color:var(--muted)}
+  .sl output{font-family:var(--mono);font-size:calc(var(--fs)*.74);color:var(--ink);text-align:right}
+  .sl input[type=range]{width:100%}
+  /* ask-the-room cards */
+  .scenario{background:#fff;border:1px solid var(--line);border-radius:10px;padding:2vh 1.4vw 1.6vh;
+    box-shadow:0 2px 10px rgba(11,37,69,.07);position:relative}
+  .scenario::before{content:"ASK THE ROOM";position:absolute;top:-.9em;left:1.2vw;font-family:var(--mono);
+    font-size:calc(var(--fs)*.55);letter-spacing:.14em;background:var(--trace);color:#fff;padding:.25em .7em;border-radius:20px}
+  .scenario h3{margin-top:.6vh}
+  .scenario p{font-size:calc(var(--fs)*.84)}
+  .choices{display:flex;flex-direction:column;gap:.7vh;margin-top:1.4vh;counter-reset:opt}
+  .choices button{counter-increment:opt;display:flex;align-items:center;gap:.8vw;text-align:left;cursor:pointer;
+    font-family:var(--body);font-size:calc(var(--fs)*.78);color:var(--ink);background:var(--panel2);
+    border:1.5px solid var(--line);border-radius:8px;padding:.55em .8em;transition:all .15s}
+  .choices button::before{content:counter(opt,upper-alpha);display:inline-flex;align-items:center;justify-content:center;
+    width:1.7em;height:1.7em;border-radius:50%;background:#fff;border:1.5px solid var(--trace);color:var(--trace);
+    font-family:var(--mono);font-weight:700;font-size:.85em;flex:none}
+  .choices button:hover{border-color:var(--trace);background:#eef4ff}
+  .choices button::after{margin-left:auto;font-weight:700}
+  .choices button.correct{background:#e5f5ee;border-color:#12805c;color:#0b4d38}
+  .choices button.correct::before{background:#12805c;border-color:#12805c;color:#fff}
+  .choices button.correct::after{content:"✓";color:#12805c}
+  .choices button.wrong{background:#fdecef;border-color:var(--alarm);color:#7a1426}
+  .choices button.wrong::before{background:var(--alarm);border-color:var(--alarm);color:#fff}
+  .choices button.wrong::after{content:"✗";color:var(--alarm)}
+  .choices button.dim{opacity:.45}
+  .qstatus{font-size:calc(var(--fs)*.76);margin-top:1.2vh;min-height:1.3em;border-left:3px solid transparent;padding-left:.8vw}
+  .qstatus.good,.qstatus.bad{border-left-color:currentColor}
+  .qstatus.good{color:#0b4d38}.qstatus.bad{color:#7a1426}
+  .qreset{font-family:var(--mono);font-size:calc(var(--fs)*.6);color:var(--muted);background:none;border:none;
+    cursor:pointer;margin-top:.6vh;text-decoration:underline;display:none}
+  /* cost matrix */
+  .cm{display:grid;grid-template-columns:auto 1fr 1fr;gap:4px;font-family:var(--mono);
+    font-size:calc(var(--fs)*.8)}
+  .cm div{padding:1.1vh .8vw;background:var(--panel2);border-radius:3px;text-align:center}
+  .cm .hd{background:transparent;color:var(--muted)}
+  .cm .tp{background:#e3edfc;color:var(--trace)} .cm .tn{background:#f7faff;color:var(--muted)}
+  .cm .fp{background:#fbf1dc;color:var(--amber)} .cm .fn{background:#fde6ea;color:var(--alarm)}
+  /* txn card */
+  .txn{font-family:var(--mono);font-size:calc(var(--fs)*.8);background:#fbfdff;border:1px solid var(--line);
+    border-radius:4px;padding:1.6vh 1.2vw;line-height:1.7}
+  .txn .k{color:var(--muted)}
+  /* chrome */
+  #bar{position:fixed;left:0;top:0;height:3px;background:var(--trace);width:0;
+    transition:width .22s;z-index:50}
+  #hdr{position:fixed;top:0;left:6.5vw;right:6.5vw;height:9vh;display:flex;align-items:flex-end;
+    justify-content:space-between;padding-bottom:1.2vh;border-bottom:1px solid var(--line);z-index:40;
+    font-size:calc(var(--fs)*.56);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);pointer-events:none}
+  #hdr b{color:var(--trace);font-weight:700}
+  #hdr.hide{display:none}
+  #ftr{position:fixed;left:6.5vw;bottom:3.2vh;font-size:calc(var(--fs)*.56);color:var(--muted);z-index:40;letter-spacing:.04em}
+  #ftr.hide{display:none}
+  #count{position:fixed;right:6.5vw;bottom:3.2vh;color:var(--muted);
+    font-family:var(--mono);font-size:calc(var(--fs)*.62);font-weight:700;z-index:50;letter-spacing:.12em}
+  #notes{position:fixed;left:0;right:0;bottom:0;max-height:36vh;overflow:auto;
+    background:#0b2545;border-top:2px solid var(--trace);color:#eaf1fb;
+    padding:14px 22px;font-size:15px;line-height:1.45;display:none;z-index:60}
+  #notes.show{display:block}#notes b{color:#ffd27a}
+  #hint{position:fixed;left:9vw;bottom:3.2vh;color:#8a9bb8;
+    font-family:var(--mono);font-size:11px;z-index:50}
+
+  /* flow: link lines, recaps, the five-stage thread */
+  .next{margin-top:auto;padding-top:2vh;display:flex;align-items:baseline;gap:.9vw;
+    font-size:calc(var(--fs)*.74);color:var(--muted)}
+  .next::before{content:"NEXT →";font-family:var(--mono);font-size:.78em;letter-spacing:.12em;color:var(--trace);font-weight:700;flex:none}
+  .divider .lede{font-size:calc(var(--fs)*1.02);color:var(--muted);max-width:56ch;margin-top:2.6vh;line-height:1.5}
+  .pipe{display:flex;align-items:stretch;margin-top:4.5vh;max-width:86vw}
+  .pipe .st{flex:1;padding:1.1vh .9vw 1.2vh;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--muted)}
+  .pipe .st i{display:block;font-family:var(--mono);font-style:normal;font-size:calc(var(--fs)*.52);letter-spacing:.12em}
+  .pipe .st b{display:block;font-family:var(--display);font-size:calc(var(--fs)*.95);margin:.2vh 0}
+  .pipe .st span{display:block;font-size:calc(var(--fs)*.6);line-height:1.3}
+  .pipe .ar{align-self:center;color:#9fbdf0;padding:0 .5vw;font-size:calc(var(--fs)*.9)}
+  .pipe .st.done{color:var(--trace);border-color:#9fbdf0;background:var(--panel2)}
+  .pipe .st.now{background:var(--trace);border-color:var(--trace);color:#fff}
+  .slide:not(.divider) .pipe{margin-top:3vh}
+  #gbCanvas,#drCanvas,#smCanvas,#bCanvas{width:auto;max-width:100%}
+  #gbCanvas{height:49vh} #drCanvas,#smCanvas,#bCanvas{height:45vh}
+
+  /* figures */
+  .fig{display:flex;justify-content:center}
+  .fig img{display:block;max-width:100%;height:auto;width:auto;object-fit:contain}
+</style>
+</head>
+<body>
+<div id="deck">
+
+<section class="slide divider" data-notes="<b>0:00–0:02 Open.</b> Module 1, just before this: 'is this point unusual?'. Today: 'is it worth stopping, and can we defend the decision?'. One hour of theory, then one hour of lab on the same story.">
+  <div class="num">MSCA · Doctoral Programme · Module 2 of 3</div>
+  <h1 style="font-size:calc(var(--fs)*3.1)">Fraud<br>Detection</h1>
+  <p class="muted" style="margin-top:2vh" class="big">Cost-sensitive learning · concept drift · explainability</p>
+  <p class="muted" style="margin-top:3vh">Oana Sîrbu — Data Scientist at Dell Technologies</p>
+</section>
+
+<section class="slide" data-notes="Orient them. Three modules, back to back today. Module 1 gave us the anomaly types, detectors and honest metrics, and ended on a question: there is no free threshold, so who decides where it goes? Module 2 adds money, time and accountability: the three things that separate a Kaggle notebook from a production fraud system. Module 3, right after this, moves to time series, where the context (hour, weekday, season) decides what is anomalous.">
+  <div class="chan">COURSE MAP · <b>3 modules, back to back</b></div>
+  <h2>Where this module sits</h2>
+  <div class="road">
+    <div class="mod done"><div class="mn">Module 1</div><h4>Classical models on tabular data</h4><p>Anomaly types · detectors (Isolation Forest, LOF) · precision, recall, PR-AUC · no free threshold.</p></div>
+    <div class="mod today"><span class="todaytag">▸ now</span><div class="mn">Module 2</div><h4>Fraud: cost, drift &amp; explainability</h4><p>Imbalance strategies · cost-sensitive decisions · supervised vs. unsupervised · SHAP.</p></div>
+    <div class="mod"><div class="mn">Module 3</div><h4>Contextual anomalies &amp; seasonality</h4><p>Trend / seasonality / residual · sliding-window features · dynamic z-score vs. Isolation Forest on NYC taxi demand.</p></div>
+  </div>
+  <div class="next">What you'll be able to do in one hour</div>
+</section>
+
+<section class="slide" data-notes="Four objectives in plain words; each one is a Part of the lab (B, C, D, E). The strip at the bottom is the map for the hour. Stress the rule: everything here becomes code within the hour.">
+  <div class="chan">MODULE 2 · <b>today's objectives</b></div>
+  <h2>By the end of this block you can…</h2>
+  <div class="two">
+    <ul>
+      <li>Explain what <b>SMOTE and class weights</b> really do, and why a probability must be <b>calibrated</b></li>
+      <li>Decide with <b>money</b>, not F1: flag when <i>p × amount</i> is larger than the cost of a review</li>
+      <li>Recognise <b>concept drift</b>, and use an <b>unsupervised</b> detector as a safety net</li>
+      <li>Explain a single alert with <b>SHAP</b>, and read the explanation critically</li>
+    </ul>
+    <div class="panel amber">
+      <h3>The question of the day</h3>
+      <p>Not "is this transaction unusual?", but <b>"is it worth stopping, given what each mistake costs, and can we defend that decision to an auditor?"</b></p>
+    </div>
+  </div>
+  <div class="pipe" data-at="0"></div>
+  <div class="next">Before any model: a decision</div>
+</section>
+
+<section class="slide" data-notes="<b>Hook, 2 min.</b> Ask the room: block both? Most say 'block the first, let the second go'. Ask WHY. The right-hand alert is MORE likely to be fraud, yet it is not worth a $15 review: its expected loss is only ~$10. Probability alone does not decide; probability times amount does. That is the whole of Part 3, kept intuitive here.">
+  <div class="chan">A QUESTION WORTH $1,800</div>
+  <h2>Two alerts, one analyst. Which do you review?</h2>
+  <div class="two" style="grid-template-columns:1fr 1fr">
+    <div class="txn">
+      <div><span class="k">amount     </span> <b>$1,801</b></div>
+      <div><span class="k">time       </span> 03:12</div>
+      <div><span class="k">merchant   </span> shopping_net</div>
+      <div><span class="k">card avg   </span> $94 &nbsp;<span class="bad">(19× usual)</span></div>
+      <div><span class="k">P(fraud)   </span> <b class="amb">0.30</b></div>
+    </div>
+    <div class="txn">
+      <div><span class="k">amount     </span> <b>$22</b></div>
+      <div><span class="k">time       </span> 14:40</div>
+      <div><span class="k">merchant   </span> grocery_pos</div>
+      <div><span class="k">card avg   </span> $61</div>
+      <div><span class="k">P(fraud)   </span> <b class="amb">0.45</b></div>
+    </div>
+  </div>
+  <p class="muted" style="margin-top:2.4vh">A review costs ~$15. The right-hand alert is <i>more likely</i> fraud, but its expected loss is 0.45 × $22 ≈ $10, less than the review. The left one: 0.30 × $1,801 ≈ <b>$540</b>.</p>
+  <div class="next">Why fraud is harder than Module 1's anomalies</div>
+</section>
+
+<section class="slide divider" data-notes="<b>0:05 Part 1.</b> ~11 min. What makes fraud different from the anomaly detection of Module 1.">
+  <div class="num">Part 1 — The domain</div>
+  <h1>Fraud is not just "imbalanced classification"</h1>
+  <p class="lede">Module 1 asked whether a point is unusual. In fraud, the unusual points cost money, fight back, and must be explained.</p>
+</section>
+
+<section class="slide" data-notes="Four properties; each maps to a part of the lab. Imbalance → B. Example-dependent cost → C. Adversarial drift + delayed labels → D. Accountability → E. Mention the numbers: card fraud is typically 0.1–0.6% of transactions; chargeback windows are 30–120 days.">
+  <div class="chan">FOUR PROPERTIES · <b>each one breaks a default</b></div>
+  <h2>What makes fraud hard</h2>
+  <div class="grid4">
+    <div class="panel alarm"><h3>Extreme imbalance</h3><p>~0.1–0.6 % positives. Accuracy is meaningless; even PR-AUC is noisy with a few hundred frauds.</p><p class="small" style="margin-top:1vh">breaks: default loss, default threshold</p></div>
+    <div class="panel amber"><h3>Unequal costs</h3><p>Missing a $3 fraud ≠ missing a $3,000 one. Every review costs analyst time.</p><p class="small" style="margin-top:1vh">breaks: F1, any count-based metric</p></div>
+    <div class="panel"><h3>Adversarial drift</h3><p>Fraudsters adapt to the model. Labels arrive <b>30–90 days</b> late, mostly for what you flagged.</p><p class="small" style="margin-top:1vh">breaks: random splits, "train once"</p></div>
+    <div class="panel"><h3>Accountability</h3><p>Investigators, validators, auditors and customers all ask <b>"why?"</b></p><p class="small" style="margin-top:1vh">breaks: "the model said so"</p></div>
+  </div>
+  <div class="next">One difference changes the method: here, we get labels</div>
+</section>
+
+<section class="slide" data-notes="Is this still anomaly detection? Yes. Chandola, Banerjee and Kumar (2009) define three settings by what is labelled. Unsupervised: nothing labelled, flag what is far from the bulk (Module 1). Semi-supervised: only normal data is trusted, learn normality and flag what does not fit. Supervised: both classes labelled; anomaly detection becomes rare-class classification. Card fraud lives at the supervised end because chargebacks and reviewed alerts give labels, so we can learn P(fraud | x) directly. But labels arrive late (30 to 90 days) and mostly for what we checked, and a brand-new fraud pattern has no labels at all. That is why Module 1's unsupervised detectors come back in Part 4. The method changes with the labels; the problems (rarity, unequal costs, new anomalies) stay.">
+  <div class="chan">FROM MODULE 1 TO TODAY · <b>is this still anomaly detection?</b></div>
+  <h2>Labels change the method, not the problem</h2>
+  <div class="fig"><img src="img/settings.svg" alt="Three settings: unsupervised, semi-supervised, supervised" style="max-height:44vh"></div>
+  <div class="two" style="margin-top:1.6vh;grid-template-columns:1fr 1fr;gap:2.4vw">
+    <p>In fraud, <b>labels exist</b>: chargebacks, disputes, every reviewed alert. So we can learn <math><mi>P</mi><mo stretchy="false">(</mo><mtext>fraud</mtext><mo>∣</mo><mi>x</mi><mo stretchy="false">)</mo></math> directly: <b>supervised</b>.</p>
+    <div class="panel amber" style="padding:1.4vh 1.4vw"><p>But labels come <b>30–90 days late</b>, mostly for what we checked, and new fraud has <b>none yet</b>. Module 1's detectors return in Part 4.</p></div>
+  </div>
+  <div class="next">So we train a classifier. First: what does it see?</div>
+</section>
+
+<section class="slide" data-notes="What the lab feeds the model. A raw transaction says little: the same $400 is normal for one card and alarming for another. So we describe behaviour RELATIVE TO THE CARD'S OWN PAST. The picture is a real card from the lab data: blue dots are its legit purchases, the amber line is its average so far, and the red dots are a fraud episode. amt_ratio is simply dot divided by line. n_txn_24h counts purchases in the previous 24 hours (velocity). Also in the lab: time since the last purchase, distance to the merchant, first purchase in a category. Golden rule: every feature must exist at authorisation time, computed from the past only (in pandas, shift(1) before the running mean). Then split by time: train, validation (for thresholds and calibration), test, and a 'future' period that plays deployment.">
+  <div class="chan">WHAT THE MODEL SEES · <b>a real card from the lab data</b></div>
+  <h2>Describe behaviour, not just the transaction</h2>
+  <div class="fig"><img src="img/card_history.svg" alt="One card's purchases, its running average, and a fraud episode" style="max-height:44vh"></div>
+  <p style="max-width:none;margin-top:1.2vh"><span class="tag t-ctx">amt_ratio</span> amount ÷ the card's average so far &nbsp; <span class="tag t-ctx">n_txn_24h</span> purchases in the past 24 h &nbsp; <b>Golden rule:</b> use the <b>past only</b>.</p>
+  <div style="display:flex;gap:4px;margin-top:1.6vh;font-family:var(--mono);font-size:calc(var(--fs)*.64)">
+    <div style="flex:10;background:var(--panel);border-top:3px solid var(--trace);padding:.7vh .6vw">train · Jan–Oct 2019</div>
+    <div style="flex:3;background:var(--panel);border-top:3px solid var(--amber);padding:.7vh .6vw;white-space:nowrap">val · Nov–Dec</div>
+    <div style="flex:6;background:var(--panel);border-top:3px solid var(--muted);padding:.7vh .6vw">test · Jan–Jun 2020</div>
+    <div style="flex:6;background:var(--panel);border-top:3px solid var(--alarm);padding:.7vh .6vw">future (deployment) · Jul–Dec 2020</div>
+  </div>
+  <div class="next">How a boosted model learns from these features</div>
+</section>
+
+<section class="slide" data-notes="<b>Boosting widget, ~3 min.</b> <b>On screen.</b> Top: 160 toy transactions with one feature, the amount ÷ the card's usual spend (log scale). Red dots (top) = fraud, blue (bottom) = legitimate; fraud share exaggerated to 35 % so it is visible. Two fraud bumps: card testing (tiny amounts) and purchases far above usual. Dashed grey = the true P(fraud), hidden from the model. Thick dark line = the model's P(fraud). Bottom strip: residuals y − p, what is still wrong (high = missed fraud, low = false alarm, near 0 = right); amber = the next depth-2 tree (at most 4 steps) fitted to them. Right: number of trees, average log-loss on the 160 training points and on 3,000 held-out points drawn from the same truth, best held-out value so far (amber dashed line on the mini chart). <b>One step (+1 tree).</b> At m = 0 the model is flat at the base rate. The amber tree is fitted to the residuals; the line moves by η × that tree; residuals shrink where it helped; the next tree goes after what is left. <b>Demo.</b> (1) +1 tree two or three times at the default η = 0.3, narrating: residuals → tree → line moves. (2) Drag the slider to η = 1 (changing η resets), press play: training loss keeps falling, held-out loss is best after 2 trees (0.473) and climbs to 0.58 by 80 trees; the curve wiggles through single points: memorising. (3) Set η = 0.1 and play: slower, best 0.461 at ~35 trees, still 0.466 at 80: it stays near its best. <b>Emphasise.</b> Each tree fits what is still wrong. One small tree is weak; the sum is strong. Only the held-out curve tells the truth; training loss always falls. The best values barely differ (0.46 vs 0.47): a small η does not win by a better peak, it wins by not falling apart, so early stopping on validation data can pick the stopping point safely. Hence the lab: 400 trees, depth 4, η = 0.05. <b>If asked.</b> Splits here are chosen by least squares on the residuals (Friedman, 2001); leaf values are Newton steps, sum of gradients / (sum of Hessians + λ), λ = 1; XGBoost picks splits with a gradient-and-Hessian gain.">
+  <div class="chan">GRADIENT BOOSTING · <b>press play, then change the learning rate</b></div>
+  <h2>Each small tree fixes what is still wrong</h2>
+  <div class="two" style="grid-template-columns:1.32fr .68fr;gap:2.6vw">
+    <div class="interactive">
+      <canvas id="gbCanvas" width="680" height="330"></canvas>
+      <div class="controls">
+        <button class="ui" id="gbStep">+1 tree</button>
+        <button class="ui" id="gbPlay">▶ play</button>
+        <button class="ui" id="gbReset">↺ reset</button>
+        <label>learning rate η</label><input id="gbEta" type="range" min="0" max="4" step="1" value="2" style="width:min(12vw,170px)"><b id="gbEtaV" class="amb" style="font-family:var(--mono)">—</b>
+      </div>
+    </div>
+    <div class="interactive">
+      <div class="panel">
+        <math class="eq" style="font-size:1.35em;margin-top:0"><mrow><msub><mi>F</mi><mi>m</mi></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mi>F</mi><mrow><mi>m</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>+</mo><mi>η</mi><mspace width="0.15em"></mspace><msub><mi>h</mi><mi>m</mi></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></math>
+        <p class="small" style="margin-bottom:1vh"><b>h<sub>m</sub></b>: a depth-2 tree fitted to the residuals <i>y − p</i>. <b>η</b>: how much of it we keep.</p>
+        <div class="readout" style="flex-direction:column;gap:.4vh;margin-top:0">
+          <div><span class="k">trees m        </span><b id="gbM">0</b></div>
+          <div><span class="k">training loss  </span><b id="gbTr" class="good">—</b></div>
+          <div><span class="k">held-out loss  </span><b id="gbVa" class="bad">—</b></div>
+          <div><span class="k">best held-out  </span><b id="gbBest" class="amb">—</b></div>
+        </div>
+        <canvas id="gbLoss" width="320" height="150" style="margin-top:1vh"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="next">The model is trained. But fraud is under 1 % of the data. Does that need fixing?</div>
+</section>
+
+<section class="slide divider" data-notes="<b>0:16 Part 2.</b> ~13 min. Imbalance and calibration.">
+  <div class="num">Part 2 — Imbalance</div>
+  <h1>SMOTE or class weights?</h1>
+  <p class="lede">Fraud is under 1 % of transactions, and every tutorial "fixes" that first. What does the fix really do?</p>
+</section>
+
+<section class="slide" data-notes="Three tools, one idea: make fraud count more in training. Class weights: each fraud counts w times (scale_pos_weight = number of legit / number of frauds, about 190 in the lab). Cost weights: each row counts by what a mistake on it would cost, so a $2,000 fraud counts more than a $5 one. SMOTE: instead of weights, add rows, invented by interpolating between two real frauds. All three are the same weighted log-loss with a different c_i. Key message: none of them adds information. They only change how much the loss cares about each row, and that will change what the probability means.">
+  <div class="chan">ONE IDEA, THREE TOOLS · <b>make fraud count more</b></div>
+  <h2>Three ways to make fraud count more</h2>
+  <div class="fig"><img src="img/rebalance.svg" alt="Unweighted, class weights and SMOTE on the same toy data" style="max-height:42vh"></div>
+  <div class="two" style="margin-top:1.4vh;grid-template-columns:1.1fr .9fr;gap:2vw;align-items:center">
+    <math class="eq" style="font-size:1.3em;margin:0"><mrow><mi>L</mi><mo>=</mo><mo>−</mo><munder><mo>∑</mo><mi>i</mi></munder><msub><mi>c</mi><mi>i</mi></msub><mo stretchy="false">[</mo><msub><mi>y</mi><mi>i</mi></msub><mi>log</mi><msub><mi>p</mi><mi>i</mi></msub><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><msub><mi>y</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mi>log</mi><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><msub><mi>p</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mo stretchy="false">]</mo></mrow></math>
+    <p class="small" style="color:var(--ink)"><b>c<sub>i</sub></b> = how much row <i>i</i> counts. Weights change c<sub>i</sub>; SMOTE adds rows instead. <b>None of them adds information.</b></p>
+  </div>
+  <div class="next">The most famous tool first: SMOTE</div>
+</section>
+
+<section class="slide" data-notes="<b>SMOTE widget.</b> Click 'Run SMOTE' a few times. Each synthetic fraud lies on a segment between a fraud and one of its k=5 fraud neighbours. When fraud lives in separate pockets, segments cross legitimate territory: synthetic frauds land where real customers are. In the lab, 70% of SMOTE frauds had a fractional merchant category: '0.46 grocery + 0.54 shopping_net'. Transactions that cannot exist.">
+  <div class="chan">SMOTE · <b>x<sub>new</sub> = x<sub>i</sub> + λ (x<sub>nn</sub> − x<sub>i</sub>), λ ~ U(0,1)</b></div>
+  <h2>Interpolation assumes the minority is convex</h2>
+  <div class="interactive">
+    <canvas id="smCanvas" width="900" height="300"></canvas>
+    <div class="controls">
+      <button class="ui" id="smRun">Run SMOTE (+40)</button>
+      <button class="ui" id="smReset">Reset</button>
+      <span class="readout" style="margin:0">
+        <span><span class="k">synthetic frauds </span><b id="smN">0</b></span>
+        <span><span class="k">landed in legit territory </span><b id="smBad" class="bad">—</b></span>
+      </span>
+    </div>
+  </div>
+  <div class="next">Weights invent nothing, but they change what p means. First: what should p mean?</div>
+</section>
+
+<section class="slide" data-notes="Define calibration before we break it. A model is calibrated if, among all transactions it scores at 2 %, about 2 % really are fraud. Weather-forecast analogy: of all days forecast at 30 % rain, it should rain on about 30 %. Left picture: 100 transactions, the model says 2 % for each, and 2 turn out to be fraud: calibrated. Right: same 100 transactions, a class-weighted model says 40 %, still 2 are fraud: the ranking can be perfect while the number is wrong. Ranking metrics (ROC-AUC, PR-AUC) cannot see this. But the moment we multiply p by dollars (Part 3), the scale matters. Measure: reliability diagram (predicted vs. observed per bin), Brier score. Fix: Platt scaling, a 2-parameter logistic regression on the model's logit, fitted on held-out validation data.">
+  <div class="chan">BEFORE WE GO ON · <b>what "calibrated" means</b></div>
+  <h2>A probability should mean what it says</h2>
+  <div class="two" style="grid-template-columns:1.25fr .75fr;gap:2.4vw;align-items:center">
+    <div class="fig"><img src="img/calibration_idea.svg" alt="100 transactions, 2 frauds: a calibrated model says 2 %, a weighted one says 40 %" style="max-height:54vh"></div>
+    <div>
+      <math class="eq" style="font-size:1.35em;margin-top:0"><mrow><mi>P</mi><mo stretchy="false">(</mo><mtext>fraud</mtext><mo>∣</mo><mover><mi>p</mi><mo>^</mo></mover><mo>=</mo><mi>p</mi><mo stretchy="false">)</mo><mo>=</mo><mi>p</mi></mrow></math>
+      <ul style="gap:1.2vh">
+        <li style="font-size:calc(var(--fs)*.86)">Like a forecast: "30 % rain" should mean rain on ~30 % of those days</li>
+        <li style="font-size:calc(var(--fs)*.86)">PR-AUC cannot see it. <b>Costs can.</b></li>
+        <li style="font-size:calc(var(--fs)*.86)"><b>Fix:</b> Platt scaling, <math><mi>σ</mi><mo stretchy="false">(</mo><mi>a</mi><mo>·</mo><mtext>logit</mtext><mspace width="0.1em"></mspace><mi>p</mi><mo>+</mo><mi>b</mi><mo stretchy="false">)</mo></math>, fitted on validation data</li>
+      </ul>
+    </div>
+  </div>
+  <div class="next">Now watch class weights break it</div>
+</section>
+
+<section class="slide" data-notes="<b>Weight widget.</b> The core insight. For a well-specified model, training with positive weight w multiplies the posterior odds by w. So a 0.5 cut on the weighted model equals a cut at 1/(1+w) on the true probability: class weights are threshold-moving in disguise. Drag w to 191 (the lab's n_neg/n_pos): a true 0.5% risk is reported as ~49%. Fine for ranking, but anything that consumes the number as a probability (a cost formula, a downstream system, a dashboard) is now wrong. <b>Step by step (if the room is lost).</b> (1) A weight w = 191 means every fraud counts as if it appeared 191 times: like photocopying each fraud 191 times before training. (2) Take a group where the true fraud rate is 0.5 %: 5 frauds, 995 legit per 1,000. The weighted model sees 5 × 191 = 955 frauds vs 995 legit, so it learns 955 / 1,950 ≈ 49 %. The true risk is still 0.5 %. (3) The same happens at every risk level: the odds get multiplied by w, which is the formula on the right. True 0.01 % → reported 1.9 %; 0.5 % → 49 %; 2 % → 80 %. (4) Threshold in disguise: solving p_w = 0.5 gives p = 1/(w+1) = 1/192 ≈ 0.5 %. 'Flag at 50 % on the weighted model' is the same decision as 'flag at 0.5 % on an honest model': the weight only moved the threshold; lowering the threshold would do the same, without retraining. (5) The inflation keeps the order (higher true risk → higher p_w), so the ranking and PR-AUC are unchanged (next slide: 0.869 vs 0.862). But the number is no longer a probability: in Part 3 we multiply p by the amount, and 49 % instead of 0.5 % overstates the expected loss about 100× → far too many reviews. (6) Fix: inverting the formula is exact only for an ideal model; on real boosted trees use Platt scaling on validation data (previous slide). <b>Analogy.</b> A forecaster trained on data where every rainy day was copied 191 times still knows which days are rainier (ranking OK), but says '50 % rain' on days where it rains 1 time in 200: fine for sorting days, useless for deciding on an umbrella. <b>Widget.</b> At w = 1 the red and grey curves coincide: no distortion. Drag w up: the red curve lifts above the grey one; point at true p = 0.5 %, where red reads ≈ 49 %.">
+  <div class="chan">CLASS WEIGHTS · <b>drag the weight</b></div>
+  <h2>Class weights move the threshold, and break the probability</h2>
+  <div class="two" style="grid-template-columns:1.2fr .8fr">
+    <div class="interactive">
+      <canvas id="wCanvas" width="640" height="340"></canvas>
+      <div class="controls"><label>weight w</label><input id="wRange" type="range" min="0" max="300" value="228"><b id="wVal" class="amb" style="font-family:var(--mono)">—</b></div>
+    </div>
+    <div class="panel amber">
+      <math class="eq" style="font-size:1.7em"><mrow><mfrac><msub><mi>p</mi><mi>w</mi></msub><mrow><mn>1</mn><mo>−</mo><msub><mi>p</mi><mi>w</mi></msub></mrow></mfrac><mo>=</mo><mi>w</mi><mo>·</mo><mfrac><mi>p</mi><mrow><mn>1</mn><mo>−</mo><mi>p</mi></mrow></mfrac></mrow></math>
+      <p class="small" style="margin:1vh 0 1.4vh"><b>p</b> = true probability of fraud (grey line: an honest model reports p itself)<br><b>p<sub>w</sub></b> = probability reported by a model trained with fraud weight <b>w</b> (red curve)</p>
+      <div class="readout" style="flex-direction:column;gap:.8vh">
+        <div><span class="k">0.5 on p<sub>w</sub> ≡ p = </span><b id="wThr">—</b></div>
+        <div><span class="k">true 0.5% risk reported as </span><b id="wRep" class="bad">—</b></div>
+      </div>
+      <p class="small" style="margin-top:1.4vh">Elkan (2001) · Saerens et al. (2002). Exact for an ideal model. On real boosted trees, simply <b>recalibrate on validation data</b> (Platt).</p>
+    </div>
+  </div>
+  <div class="next">Does it show up on the lab's model?</div>
+</section>
+
+<section class="slide" data-notes="Lab preview, Part B. Read the left plot first: the dashed diagonal is perfect calibration. The class-weighted model (red) sits below it at the top end: it over-states the risk, its mean probability is 1.6 times the real fraud rate. Right: after Platt scaling on the validation set, all three curves lie on top of each other. Ranking (PR-AUC) was the same all along: 0.869, 0.862, 0.866 (the numbers in the figure legends are mean p ÷ fraud rate, not PR-AUC). So on a strong learner the imbalance trick mostly moves the threshold; the value is in calibration and in the decision rule. Production default: no rebalancing (or weights) plus recalibration. SMOTE has a niche: learners that cannot take weights, like k-NN, on low-dimensional continuous data. Evidence: Elor and Averbuch-Elor 2022; van den Goorbergh et al. 2022 (JAMIA); Carriero et al. 2025 for flexible ML models: imbalance corrections harm calibration.">
+  <div class="chan">WHAT THE LAB SHOWS · <b>XGBoost, test set (H1 2020)</b></div>
+  <h2>Same ranking, broken probability, and an easy repair</h2>
+  <div class="fig"><img src="img/lab_calibration.svg" alt="Reliability curves before and after Platt scaling" style="max-height:49vh"></div>
+  <p style="max-width:none;margin-top:1.2vh;font-size:calc(var(--fs)*.86)">PR-AUC (unweighted · class weights · SMOTE): <b>0.869 · 0.862 · 0.866</b>, so no information was added. The figure's numbers are mean p ÷ fraud rate, not PR-AUC. <b>Production default:</b> no rebalancing (or weights) + recalibrate. SMOTE only for learners that can't take weights, such as k-NN.</p>
+  <div class="src">synthetic Sparkov-like data · Module 2 lab, Part B · Carriero et al. 2025 · van den Goorbergh et al. 2022</div>
+  <div class="next">Your turn: two quick cases</div>
+</section>
+
+<section class="slide" data-notes="<b>Pulse 1, 2 min.</b> Left: k-NN cannot take sample weights, 6 continuous dims: SMOTE is a reasonable choice. Right: the probability is consumed downstream as a risk, so any reweighting must be undone; simplest is no reweighting + recalibration + a decision rule.">
+  <div class="chan">PULSE 1 · <b>pick the imbalance strategy</b></div>
+  <h2>SMOTE, weights, or neither?</h2>
+  <div class="two" style="grid-template-columns:1fr 1fr">
+    <div class="scenario" data-answer="smote" data-ok="Reasonable: k-NN cannot take sample weights, and the space is low-dimensional and continuous." data-no="Can this learner take sample weights at all? What kind of features does it see?">
+      <h3>The sensor lab</h3>
+      <p>A k-NN detector on 6 continuous vibration features. 0.8 % faults. The library has no sample-weight option.</p>
+      <div class="choices interactive"><button data-type="smote">SMOTE</button><button data-type="weights">class weights</button><button data-type="none">no reweighting</button></div>
+      <div class="qstatus"></div>
+    </div>
+    <div class="scenario" data-answer="none" data-ok="Right: the score is used as a probability downstream, so keep it calibrated and move the economics into the decision rule." data-no="Who consumes this number, and do they need it to be a real probability?">
+      <h3>The bank</h3>
+      <p>XGBoost on 180 mixed features, retrained nightly. Its score is sent to a pricing engine that treats it as <b>P(fraud)</b>.</p>
+      <div class="choices interactive"><button data-type="smote">SMOTE</button><button data-type="weights">class weights</button><button data-type="none">no reweighting</button></div>
+      <div class="qstatus"></div>
+    </div>
+  </div>
+  <div class="next">We have a probability we can trust. What do we do with it?</div>
+</section>
+
+<section class="slide divider" data-notes="<b>0:29 Part 3.</b> ~12 min. The most valuable part of the day, in dollars.">
+  <div class="num">Part 3 — Cost-sensitive decisions</div>
+  <h1>A score is not a decision</h1>
+  <p class="lede">We now have a probability we can trust. Back to the two alerts from the start: to decide, we need the money.</p>
+</section>
+
+<section class="slide" data-notes="Build the business metric with them. Flagging costs a review, C_inv, whatever the truth; if the customer was legit we may add friction C_fric (churn, call-centre). Approving a fraud costs the full amount (chargeback). Approving legit costs 0. The FN cell depends on the example: that is what makes it 'example-dependent' (Bahnsen et al.). F1 ignores amounts and treats a review as being as bad as a loss.">
+  <div class="chan">THE BUSINESS METRIC · <b>example-dependent costs</b></div>
+  <h2>What does each decision cost?</h2>
+  <div class="two">
+    <div class="cm">
+      <div class="hd"></div><div class="hd">flag → review</div><div class="hd">approve</div>
+      <div class="hd">is fraud</div><div class="tp">C<sub>inv</sub><br><span class="small">fraud stopped</span></div><div class="fn"><b>amt</b><br><span class="small">chargeback</span></div>
+      <div class="hd">is legit</div><div class="fp">C<sub>inv</sub> + C<sub>fric</sub><br><span class="small">wasted review</span></div><div class="tn">0</div>
+    </div>
+    <div class="panel amber">
+      <h3>Savings (Bahnsen et al., 2014)</h3>
+      <math class="eq" style="font-size:1.2em"><mrow><mtext>Savings</mtext><mo>=</mo><mn>1</mn><mo>−</mo><mfrac><mrow><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>policy</mtext><mo stretchy="false">)</mo></mrow><mrow><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>approve all</mtext><mo stretchy="false">)</mo></mrow></mfrac></mrow></math>
+      <p class="small">Report it next to PR-AUC. Also report <b>$-recall</b>: the share of fraud <i>dollars</i> stopped.</p>
+    </div>
+  </div>
+  <div class="next">With these costs, the best decision fits in one line</div>
+</section>
+
+<section class="slide" data-notes="The rule in one line. If we approve, we expect to lose p times the amount. If we flag, we pay the review. Flag when the first is bigger. Go back to the two alerts from the start: 0.30 × $1,801 = $540, far more than a $15 review, so review it. 0.45 × $22 = $10, less than the review, so let it go, even though it is the more likely fraud. Rearranged: flag when p > C_inv / amt, a different threshold for every transaction: a $2,000 purchase is worth reviewing from 0.75 % risk; a $20 one never is. It needs a calibrated p (Part 2), and nothing is tuned on labels: when finance changes the review cost, the policy updates without retraining. If a falsely blocked customer also costs friction C_fric, the right side becomes C_inv + (1−p)·C_fric. Höppner, Baesens, Verbeke and Verdonck (EJOR 2022) use exactly these instance-dependent thresholds for transfer fraud.">
+  <div class="chan">THE DECISION RULE · <b>Elkan, 2001 · Höppner et al., 2022</b></div>
+  <h2>Flag when approving is expected to cost more</h2>
+  <math class="eq"><mrow><munder><munder accentunder="true"><mrow><mi>p</mi><mo>·</mo><mtext>amt</mtext></mrow><mo>⏟</mo></munder><mtext>expected loss if we approve</mtext></munder><mspace width="0.6em"></mspace><mo>&gt;</mo><mspace width="0.6em"></mspace><munder><munder accentunder="true"><msub><mi>C</mi><mtext>inv</mtext></msub><mo>⏟</mo></munder><mtext>cost of a review</mtext></munder><mspace width="1em"></mspace><mo>⟹</mo><mspace width="1em"></mspace><mtext>flag</mtext></mrow></math>
+  <div class="grid3" style="margin-top:2.4vh">
+    <div class="txn"><div><span class="k">alert A </span> <b>$1,801</b> · p = 0.30</div><div>0.30 × 1,801 = <b class="bad">$540</b> &gt; $15</div><div><b>→ review</b></div></div>
+    <div class="txn"><div><span class="k">alert B </span> <b>$22</b> · p = 0.45</div><div>0.45 × 22 = <b class="good">$10</b> &lt; $15</div><div><b>→ approve</b></div></div>
+    <div class="panel amber" style="padding:1.6vh 1.2vw"><p>A threshold <b>per transaction</b>: <math><mi>p</mi><mo>&gt;</mo><msub><mi>C</mi><mtext>inv</mtext></msub><mo>/</mo><mtext>amt</mtext></math>. Needs a <b>calibrated</b> p; nothing is tuned on labels.</p></div>
+  </div>
+  <div class="next">Why no single threshold can win: put the amount on an axis</div>
+</section>
+
+<section class="slide" data-notes="<b>Boundary widget.</b> Same simulated transactions, now in (amount, probability) space. The Bayes rule flags everything above the curve p = C_inv / amt. A global threshold is a horizontal line: it reviews cheap transactions it should ignore and ignores expensive ones it should review. Drag C_inv and watch the curve slide. Recent work: C-Rella, Cao &amp; Vilar (Information Sciences 2024) learn the decision region in this same (probability, amount) plane, which helps when probabilities are not perfectly calibrated.">
+  <div class="chan">THE DECISION BOUNDARY · <b>flag everything above the curve</b></div>
+  <h2>A global threshold is a horizontal line. The Bayes rule is not.</h2>
+  <div class="interactive">
+    <canvas id="bCanvas" width="900" height="290"></canvas>
+    <div class="controls">
+      <label>review cost C<sub>inv</sub></label><input id="bInv" type="range" min="1" max="100" value="15"><b id="bInvV" class="amb" style="font-family:var(--mono)">$15</b>
+      <span class="readout" style="margin:0">
+        <span><span class="k">alerts </span><b id="bAl">—</b></span>
+        <span><span class="k">recall </span><b id="bRec">—</b></span>
+        <span><span class="k">$-recall </span><b id="bDr" class="good">—</b></span>
+        <span><span class="k">cost </span><b id="bCost" class="amb">—</b></span>
+      </span>
+    </div>
+  </div>
+  <div class="next">Does it hold on the lab data?</div>
+</section>
+
+<section class="slide" data-notes="Lab preview, Part C. Total cost on the test half-year: approving everything costs $216k. The default 0.5 threshold still loses $68k; the F1-optimal threshold $35k; one global threshold tuned for cost $18k; calibrated probabilities plus the Bayes rule $15k, with no threshold tuned at all. It raises more alerts, because a $15 review is cheap compared with the average fraud. Is it real? A card-level bootstrap (resample whole cards, since one card's transactions are not independent): F1-optimal minus Bayes = $19.6k, 95 % CI [$9.2k, $32.2k]. The gap to the cost-optimal global threshold is within noise: say so. Independent evidence: Vanderschueren et al. (Information Sciences 2022), 9 real datasets: the decision strategy matters more than the training objective. Extension for later: with a fixed number of analysts, fill the queue by expected loss p·amt, not by p (lab challenge C5).">
+  <div class="chan">WHAT THE LAB SHOWS · <b>test set, H1 2020</b></div>
+  <h2>The decision rule is worth more than the model trick</h2>
+  <div class="fig"><img src="img/lab_policies.svg" alt="Cost of five decision policies on the test set" style="max-height:45vh"></div>
+  <p style="max-width:none;margin-top:1.4vh;font-size:calc(var(--fs)*.86)">Same model, five ways to decide. F1-optimal − Bayes = <b>$19.6k</b>, 95 % CI [$9.2k, $32.2k] (bootstrap by card).</p>
+  <div class="src">synthetic Sparkov-like data · Module 2 lab, Part C · same conclusion on 9 real datasets: Vanderschueren et al., 2022</div>
+  <div class="next">All of this assumes the model knows the fraud. Does it stay that way?</div>
+</section>
+
+<section class="slide divider" data-notes="<b>0:41 Part 4.</b> ~9 min. Drift, and Module 1's detectors as a safety net.">
+  <div class="num">Part 4 — Drift</div>
+  <h1>Fraudsters adapt</h1>
+  <p class="lede">Our decisions are now cost-optimal, for the fraud the model already knows. What happens when the fraud changes?</p>
+</section>
+
+<section class="slide" data-notes="<b>Drift widget.</b> Drag months forward. Until mid-2020 the frozen detector (shaded box: night + amount far above the card's usual) catches most fraud. Then the modus operandi moves to daytime, mid-size amounts: recall collapses while false alarms stay flat. Nothing in the legit cloud changed. Ask: 'would monitoring the inputs have told you?' (answer two slides later: no).">
+  <div class="chan">FRAUDSTERS ADAPT · <b>drag time forward</b></div>
+  <h2>A model trained on 2019 meets 2020</h2>
+  <div class="interactive">
+    <canvas id="drCanvas" width="900" height="300"></canvas>
+    <div class="controls">
+      <label>month</label><input id="drRange" type="range" min="0" max="23" value="6">
+      <span class="readout" style="margin:0">
+        <span><span class="k">month </span><b id="drMonth">—</b></span>
+        <span><span class="k">recall (frozen model) </span><b id="drRec">—</b></span>
+        <span><span class="k">new-MO share </span><b id="drNew" class="amb">—</b></span>
+        <span><span class="k">false alarms </span><b id="drFP" class="bad">—</b></span>
+      </span>
+    </div>
+  </div>
+  <div class="next">Let's give what just happened a name</div>
+</section>
+
+<section class="slide" data-notes="Name it. The world is a joint distribution of features and labels, and it can move in two ways. Middle: input drift, P(x) changes: customers shop differently (Christmas, a pandemic), but the fraud is still inside the box the model learned, so the model keeps working. Right: concept drift, P(fraud | x) changes: the fraudsters moved to daytime, mid-size purchases, and the box catches nothing. That is what the widget showed. Fraud adds two complications: labels arrive late (chargebacks, 30 to 90 days; Sethi et al. 2025 report 1 to 6 months on a real network), and mostly for what we flagged (Dal Pozzolo et al. 2018). Consequence for evaluation: always split by time. A random split leaks the future: in the lab PR-AUC is 0.91 with a random split vs. 0.87 with a temporal one. Shapes of drift (sudden, gradual, recurring) follow Gama et al. 2014.">
+  <div class="chan">CONCEPT DRIFT · <b>Gama et al., 2014</b></div>
+  <h2>Which part of the world moved?</h2>
+  <div class="fig"><img src="img/drift_types.svg" alt="What the model learned, input drift, concept drift" style="max-height:44vh"></div>
+  <div class="two" style="margin-top:1.4vh;grid-template-columns:1fr 1fr;gap:2.4vw;align-items:center">
+    <math class="eq" style="font-size:1.25em;margin:0"><mrow><msub><mi>P</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>x</mi><mo>,</mo><mi>y</mi><mo stretchy="false">)</mo><mo>=</mo><munder><munder accentunder="true"><mrow><msub><mi>P</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>y</mi><mo>∣</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><mo>⏟</mo></munder><mtext>concept</mtext></munder><mo>·</mo><munder><munder accentunder="true"><mrow><msub><mi>P</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><mo>⏟</mo></munder><mtext>inputs</mtext></munder></mrow></math>
+    <p class="small" style="color:var(--ink)">Labels arrive <b>30–90 days late</b>, mostly for what we flagged. So always split <b>by time</b>: a random split scores 0.91 PR-AUC in the lab, a temporal one 0.87.</p>
+  </div>
+  <div class="next">Could a monitoring dashboard have warned us?</div>
+</section>
+
+<section class="slide" data-notes="The subtle result of the lab's Part D. Banks monitor inputs with the Population Stability Index: compare a feature's histogram now with its histogram at training time; above 0.25 counts as a big shift. Left: the hour of all transactions, 2019 vs. after go-live: identical, PSI 0.00. The dashboard stays green. Right: the same feature, frauds only: completely different, PSI 2.1. Fraud is under 1 % of traffic, so it can change completely while the inputs barely move. That is concept drift without input drift. So monitor the labels (late), the alerts, and keep a detector that does not depend on fraud labels. Research is now trying to predict the degradation before labels arrive (Sethi et al., ECML-PKDD 2025).">
+  <div class="chan">REAL DRIFT CAN BE INVISIBLE · <b>lab Part D</b></div>
+  <h2>Would input monitoring have warned us?</h2>
+  <div class="fig"><img src="img/psi_hours.svg" alt="Hour of day, 2019 vs 2020: all transactions identical, frauds completely different" style="max-height:47vh"></div>
+  <p style="max-width:none;margin-top:1.4vh;font-size:calc(var(--fs)*.86)"><b>PSI</b> compares a feature's histogram now vs. at training (&gt; 0.25 = big shift). Fraud is &lt; 1 % of traffic: it can change <b>completely</b> while the inputs look the same.</p>
+  <div class="next">If the inputs can't warn us, what can? Module 1's detectors</div>
+</section>
+
+<section class="slide" data-notes="Supervised learns what fraud looked like: precise on known patterns, blind to new ones. Unsupervised (Module 1's Isolation Forest) learns what normal looks like: less precise, but it does not care what the fraud looks like. The plot is the lab's monthly PR-AUC. Until mid-2020 XGBoost wins clearly (0.8 to 0.97). When the new pattern arrives it collapses to almost zero, while Isolation Forest stays around 0.3 to 0.6. (The December 2019 dip is the legit Christmas rush: not all drift is adversarial.) Combine them: flag if the Bayes rule fires on XGBoost OR the transaction is in the top 0.5 % of Isolation Forest scores. Future-period cost drops from $49.8k to $34.0k. Be honest: without drift the net costs money. Lab D5 measures both outcomes on the SAME data: a no-drift twin of the synthetic world (same cards, same legit purchases, same fraud episodes, but the old pattern never changes). Future period: XGBoost alone $15.7k without drift vs $49.8k with drift; the hybrid $17.3k vs $34.0k. So the net is insurance: premium $1.6k if nothing changes, payout $15.7k if the fraud changes. <b>Why it is still the right choice.</b> (1) Worst case: you pick the policy before you know whether drift will come. Without the net the worst case is $49.8k, with it $34.0k: the hybrid caps the damage (minimax). (2) Break-even: the net has the lower expected cost when P(drift in the half-year) &gt; premium / (premium + payout) = 1.6 / (1.6 + 15.7) ≈ 9 %. Card fraud is adversarial: fraudsters work around whatever you block, so the chance is far higher. (3) You cannot switch it on later: labels arrive 1 to 6 months late (Sethi et al. 2025) and input monitoring stays green (previous slide), so by the time you see the drift you have already paid. The net must be in place before. (4) Lab D4 prices the Isolation Forest score with the same cost rule: a different contract, premium $3.4k, payout $19.5k, worst case $30.3k, break-even ≈ 15 %. <b>Say to students:</b> 'It is not always the cheapest: if nothing changes it costs about $1.6k. But we do not choose whether fraudsters adapt, and with labels months late we cannot react in time. The net caps the worst case at $34k instead of $50k, and if the chance of a pattern change this half-year is above about 9 %, it also wins on average.' In production: two scoring paths, one review queue, retraining that respects the label delay.">
+  <div class="chan">TWO WAYS TO BE RIGHT · <b>lab Part D</b></div>
+  <h2>Learn fraud, or learn normal?</h2>
+  <div class="fig"><img src="img/lab_drift.svg" alt="Monthly PR-AUC of XGBoost and Isolation Forest" style="max-height:42vh"></div>
+  <div class="grid3" style="margin-top:1.4vh">
+    <div class="panel"><h3 style="margin-top:0">XGBoost + Bayes</h3><p>after the change: <b>$49.8k</b> cost</p></div>
+    <div class="panel"><h3 style="margin-top:0">Isolation Forest</h3><p>top 0.5 %: <b>$52.4k</b> cost</p></div>
+    <div class="panel amber"><h3 style="margin-top:0">Either one flags</h3><p><b class="good">$34.0k</b>: an <b>insurance</b> that pays out under drift; costs <b>+$1.6k</b> if nothing changes</p></div>
+  </div>
+  <div class="next">Every alert we raise needs a reason</div>
+</section>
+
+<section class="slide divider" data-notes="<b>0:50 Part 5.</b> ~9 min. Explainability.">
+  <div class="num">Part 5 — Explainability</div>
+  <h1>"Why was my card blocked?"</h1>
+  <p class="lede">We can score, calibrate, decide and stay alert. The last property from Part 1: accountability.</p>
+</section>
+
+<section class="slide" data-notes="Be precise about regulation; PhD students will check. The EU AI Act (Regulation (EU) 2024/1689, Annex III 5(b)) lists creditworthiness/credit scoring as high-risk BUT explicitly excludes AI systems used to detect financial fraud. So a black-box fraud model is not illegal per se. The pressure comes from elsewhere: model-risk management (SR 11-7 in the US; EBA/ECB expectations in the EU) requires that models be understood and validated; GDPR Art. 22 + Arts. 13–15 require meaningful information about the logic for solely automated decisions with significant effects (blocking a card can qualify); internal audit; and above all the investigators who must act on alerts. 'Unacceptable in practice', rather than 'illegal'. Two current caveats: the Commission's 2026 draft guidelines on high-risk classification reportedly read the fraud exception narrowly (it does not cover, e.g., anti-money-laundering systems in general), and the Digital Omnibus on AI, approved in 2026, postpones the standalone high-risk obligations to December 2027. Check the Official Journal before quoting dates.">
+  <div class="chan">WHO ASKS "WHY?" · <b>and what they need</b></div>
+  <h2>A bare score of 0.93 serves nobody</h2>
+  <div class="grid4">
+    <div class="panel"><h3 style="margin-top:0">Investigator</h3><p>a concrete reason to call the customer about</p></div>
+    <div class="panel"><h3 style="margin-top:0">Model validation</h3><p>proof the model uses sensible signals, not shortcuts</p></div>
+    <div class="panel"><h3 style="margin-top:0">Auditor</h3><p>a reproducible trail for every decision</p></div>
+    <div class="panel amber"><h3 style="margin-top:0">Customer</h3><p>"meaningful information about the logic" (GDPR Art. 22)</p></div>
+  </div>
+  <p class="small" style="margin-top:2.4vh;max-width:none">Precision matters: the EU AI Act (Reg. 2024/1689) <b>excludes</b> fraud detection from its high-risk credit-scoring category (Annex III 5(b)), an exception the 2026 draft guidelines read narrowly. Black boxes in fraud are not illegal per se. They are <b>unacceptable in practice</b>.</p>
+  <div class="next">How to split one score fairly among the features</div>
+</section>
+
+<section class="slide" data-notes="<b>The name.</b> SHAP = SHapley Additive exPlanations. SHapley: the fair-share rule from cooperative game theory (Lloyd Shapley, 1953; Nobel prize in economics 2012), originally for splitting a team's payout among its players; here the players are the features and the payout is the model's score. Additive: the shares plus the average add up exactly to the score. exPlanations: local, it explains one prediction, not the model as a whole. <b>What it is, exactly.</b> A method that takes a trained model and one input x, and returns one number φ_j per feature: how far feature j moved this prediction away from the average prediction φ_0, in the model's output units. It works for any model; for trees there is a fast exact algorithm. <b>Fair share, worked example (if asked).</b> Two features, amount and hour, scores in log-odds above the average. Neither known: 0. Only amount known: +3. Only hour known: +1. Both known: +5 (together they add more than alone). Order amount-then-hour: amount brings +3, hour the remaining +2. Order hour-then-amount: hour brings +1, amount the remaining +4. Average over the two orders: amount 3.5, hour 1.5, total 5 = the full score. That averaging over orders is the Shapley value. <b>On screen.</b> SHAP in one picture. Think of splitting a restaurant bill fairly. The model's output for one transaction is the bill; the average output over all transactions (phi_0) is where everyone starts; each feature gets its share phi_j of the difference, and the shares always add up exactly to the prediction (local accuracy). 'Fair' has a precise meaning from game theory (Shapley, 1953): a feature's share is its average contribution over every order in which the features could be added. Computing that naively is exponential, but TreeSHAP (Lundberg et al. 2020) does it exactly and fast for tree ensembles. The picture is the lab's real true positive: the $1,801 purchase at 3 a.m. Starting from the average (about 0.4 %), the amount adds most, then the hour, the category and the burst of 9 purchases in 24 hours. Units: for XGBoost the shares add up in log-odds, not in probability. Practical note: the lab computes them with xgboost's own pred_contribs=True.">
+  <div class="chan">SHAP · <b>Lundberg &amp; Lee, 2017</b></div>
+  <h2>Split one score fairly among the features</h2>
+  <p class="small" style="margin:-1.6vh 0 1vh;max-width:none"><b style="color:var(--ink)">SHAP = SHapley Additive exPlanations.</b> For <b>one</b> prediction, it gives each feature a number: how far that feature pushed this score away from the average score.</p>
+  <div class="fig"><img src="img/shap_waterfall.svg" alt="SHAP waterfall of a true positive from the lab" style="max-height:39vh"></div>
+  <div class="two" style="margin-top:1.4vh;grid-template-columns:.9fr 1.1fr;gap:2.4vw;align-items:center">
+    <math class="eq" style="font-size:1.35em;margin:0"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><munder><munder accentunder="true"><msub><mi>φ</mi><mn>0</mn></msub><mo>⏟</mo></munder><mtext>average</mtext></munder><mo>+</mo><munder><mo>∑</mo><mi>j</mi></munder><munder><munder accentunder="true"><msub><mi>φ</mi><mi>j</mi></msub><mo>⏟</mo></munder><mtext>feature j's share</mtext></munder></mrow></math>
+    <p class="small" style="color:var(--ink)"><b>SH</b>apley: a fair share from game theory (Shapley, 1953), the feature's average contribution over every order the features could join.<br><b>A</b>dditive: average + shares = the model's score, <b>exactly</b>.<br>ex<b>P</b>lanations: <b>local</b>, one transaction at a time. Units: <b>log-odds</b>.</p>
+  </div>
+  <div class="next">Three alerts, three stories</div>
+</section>
+
+<section class="slide" data-notes="<b>SHAP widget.</b> A linear logit model with independent features, where SHAP has a closed form: φ_j = w_j (x_j − E[x_j]). That is exact, not a cartoon. Click the three presets. TP: amount and night push it up. FP: a legit night-owl's big purchase, so the analyst knows what to verify. FN under drift: amount and velocity push up, but 'far from home' pushes DOWN because in training far-away meant legit travel, so p falls below the Bayes threshold 15/amt. Then drag the sliders live.">
+  <div class="chan">EXPLAIN AN ALERT · <b>exact SHAP for a linear logit: φ<sub>j</sub> = w<sub>j</sub>(x<sub>j</sub> − E[x<sub>j</sub>])</b></div>
+  <h2>Three alerts, three stories</h2>
+  <div class="two" style="grid-template-columns:1.25fr .75fr;align-items:start">
+    <div class="interactive">
+      <canvas id="sCanvas" width="760" height="330"></canvas>
+      <div class="readout">
+        <span><span class="k">P(fraud) </span><b id="sP" class="amb">—</b></span>
+        <span><span class="k">Bayes threshold 15/amt </span><b id="sT">—</b></span>
+        <span><span class="k">decision </span><b id="sD">—</b></span>
+        <span><span class="k">truth </span><b id="sY">—</b></span>
+      </div>
+    </div>
+    <div class="interactive vstack">
+      <div class="controls" style="margin-top:0">
+        <button class="ui" data-preset="tp">true positive</button>
+        <button class="ui" data-preset="fp">false positive</button>
+        <button class="ui" data-preset="fn">missed (drift)</button>
+      </div>
+      <div class="sl"><label>amount</label><input id="sAmt" type="range" min="0" max="1000" value="700"><output id="oAmt"></output></div>
+      <div class="sl"><label>hour</label><input id="sHr" type="range" min="0" max="23" value="3"><output id="oHr"></output></div>
+      <div class="sl"><label>txns past 24h</label><input id="sN" type="range" min="0" max="12" value="3"><output id="oN"></output></div>
+      <div class="sl"><label>distance</label><input id="sD2" type="range" min="0" max="1000" value="400"><output id="oD"></output></div>
+      <p class="small">Weights were fitted to "2019 fraud": night, big amounts, bursts. Far-away purchases were mostly legit travel.</p>
+    </div>
+  </div>
+  <div class="next">Powerful. Now: how it can mislead</div>
+</section>
+
+<section class="slide" data-notes="Three caveats, then one surprise. (1) SHAP explains f, not the world: no causal claims. (Advanced: with correlated features, path-dependent and interventional TreeSHAP give different, both defensible, answers.) (2) Log-odds are additive, probabilities are not. (3) Slack et al. 2020 built models whose explanations hide a discriminatory feature: explanations are not a substitute for testing. Also: Bilodeau et al. (PNAS 2024) prove that for sufficiently rich model classes, SHAP and Integrated Gradients can do no better than random guessing at local tasks such as spotting a spurious feature; Huang &amp; Marques-Silva (IJAR 2024) show exact Shapley values can rank irrelevant features above relevant ones. Use SHAP as a hypothesis generator, then test. The surprise, the lab's best lesson: on synthetic data where city_pop/age/gender are independent of fraud, they still get attribution. The trees memorise the demographics of cards attacked in 2019 as a fingerprint. SHAP caught a shortcut that no metric showed.">
+  <div class="chan">READ SHAP CRITICALLY</div>
+  <h2>Three ways to over-read an explanation</h2>
+  <div class="two" style="grid-template-columns:1fr 1fr">
+    <ul style="gap:2vh">
+      <li><b>Model ≠ world.</b> "Night pushed it up" describes the model, not a cause of fraud.</li>
+      <li><b>Log-odds, not %.</b> The shares add up in log-odds; in probability they do not.</li>
+      <li><b>No guarantees.</b> Explanations can be gamed (Slack et al., 2020), and can provably miss a spurious feature (Bilodeau et al., PNAS 2024). Treat them as hypotheses to test.</li>
+    </ul>
+    <div class="panel alarm">
+      <h3>But: it may reveal a shortcut</h3>
+      <p>In the lab's synthetic data, <b>city population, age and gender are independent of fraud</b>, yet SHAP gives them weight. The trees memorised the cardholders attacked in 2019: a <b>card fingerprint</b>.</p>
+      <p class="small" style="margin-top:1vh">No aggregate metric showed it. SHAP is a <b>model audit</b> tool as much as a customer-facing one.</p>
+    </div>
+  </div>
+  <div class="next">Your turn: diagnose two models</div>
+</section>
+
+<section class="slide" data-notes="<b>Pulse 2, 2 min.</b> Left: the explanation shows an expired association, which is concept drift (the model is out of date, not broken). Right: random vs temporal split gap = leakage of episode structure / the future.">
+  <div class="chan">PULSE 2 · <b>diagnose the model</b></div>
+  <h2>What went wrong?</h2>
+  <div class="two" style="grid-template-columns:1fr 1fr">
+    <div class="scenario" data-answer="drift" data-ok="Yes: the association 'far away = legit travel' was true in 2019 and has expired. SHAP diagnosed concept drift." data-no="SHAP computed the values correctly. Was the learned association ever true?">
+      <h3>The expired reason</h3>
+      <p>For a confirmed 2020 fraud, SHAP says <i>"merchant 900 km from home"</i> pushed the score <b>down</b>. In 2019 most distant purchases were legitimate trips.</p>
+      <div class="choices interactive"><button data-type="leak">data leakage</button><button data-type="drift">concept drift</button><button data-type="bug">SHAP bug</button></div>
+      <div class="qstatus"></div>
+    </div>
+    <div class="scenario" data-answer="leak" data-ok="Right: a random split puts transactions of the same fraud episode, and from the future, into training." data-no="Same model, same data, only the split changed. What can the random split see that production can't?">
+      <h3>The optimistic split</h3>
+      <p>Same XGBoost, same data: PR-AUC <b>0.91</b> with a random split, <b>0.87</b> with a temporal one.</p>
+      <div class="choices interactive"><button data-type="leak">data leakage</button><button data-type="drift">concept drift</button><button data-type="bug">SHAP bug</button></div>
+      <div class="qstatus"></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide divider" data-notes="<b>1:00 Transition to lab.</b> Open Module2_Lab_STUDENT.ipynb. One hour. Parts A–E mirror Parts 1–5 here. Only five cells (✏️) need code, a few lines each; everything else runs and has a read-out. ⭐ cells are optional.">
+  <div class="num">To the lab — Module 2</div>
+  <h1>From scores to defensible decisions</h1>
+  <p class="muted" style="margin-top:2vh">One hour · five ✏️ exercises · Sparkov card transactions</p>
+  <div class="pipe" data-at="6"></div>
+</section>
+
+<section class="slide" data-notes="All are cited in the notebook at the exact cell where they are used. Left: the foundations the methods come from. Right: what the last few years added. Each recent paper sharpens a claim made today: imbalance corrections hurt calibration (Carriero), the decision rule beats the model trick (Vanderschueren), instance-dependent thresholds (Höppner, C-Rella), labels arrive months late (Sethi), SHAP carries no guarantees (Bilodeau, Huang &amp; Marques-Silva), and why trees still rule tabular data (McElfresh). Outlook for the curious: tabular foundation models (TabPFN) and graph neural networks for fraud rings (Cheng et al. review).">
+  <div class="chan">READING LIST · <b>foundations and recent work</b></div>
+  <h2>Key literature</h2>
+  <div class="two lit" style="grid-template-columns:1fr 1fr">
+    <div>
+      <h3>Foundations</h3>
+      <ul>
+        <li><b>Cost-sensitive:</b> Elkan (2001), IJCAI · Bahnsen et al. (2014), ICMLA</li>
+        <li><b>Imbalance:</b> Chawla et al. (2002), JAIR · Elor &amp; Averbuch-Elor (2022) · van den Goorbergh et al. (2022), JAMIA</li>
+        <li><b>Prior shift:</b> Saerens, Latinne &amp; Decaestecker (2002), Neural Comp.</li>
+        <li><b>Drift in fraud:</b> Gama et al. (2014), ACM CSUR · Dal Pozzolo et al. (2018), IEEE TNNLS</li>
+        <li><b>Explainability:</b> Lundberg &amp; Lee (2017), NeurIPS · Lundberg et al. (2020), Nat. MI · Slack et al. (2020), AIES</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Recent work · 2022–2025</h3>
+      <ul>
+        <li><b>Calibration:</b> Carriero et al. (2025), harms of imbalance corrections for ML models</li>
+        <li><b>Decisions:</b> Vanderschueren et al. (2022), Inf. Sci. · Höppner et al. (2022), EJOR · C-Rella, Cao &amp; Vilar (2024), Inf. Sci.</li>
+        <li><b>Delayed labels:</b> Sethi et al. (2025), ECML-PKDD</li>
+        <li><b>XAI limits:</b> Bilodeau et al. (2024), PNAS · Huang &amp; Marques-Silva (2024), IJAR</li>
+        <li><b>Models:</b> McElfresh et al. (2023), NeurIPS · Hollmann et al. (2025), Nature · Cheng et al. (2025), GNN review</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-notes="Three takeaways.">
+  <h2>Takeaways</h2>
+  <ul style="gap:1.8vh">
+    <li><b>Rebalancing adds no information.</b> It moves the threshold and breaks the probability: recalibrate.</li>
+    <li><b>Decide with money, not F1.</b> Flag when <i>p × amount</i> is larger than the review cost.</li>
+    <li><b>Supervised learns the past; unsupervised guards the present.</b> Fraud changes, and labels come late.</li>
+    <li><b>Explain every alert, and question the explanation.</b> SHAP can also reveal a shortcut.</li>
+  </ul>
+</section>
+
+<section class="slide divider" data-notes="10 seconds. Just the reminder; the brief has the details.">
+  <div class="num">Reminder</div>
+  <h1>Final project due 30 December 2026, 23:59</h1>
+</section>
+
+<!-- CONNECT -->
+<section class="slide" data-notes="10 seconds. Invite them to connect with all three of us on LinkedIn: questions about the project, the field or careers are welcome. Links are clickable.">
+  <div class="chan">STAY IN TOUCH · <b>LinkedIn</b></div>
+  <h2>Let's connect</h2>
+  <div class="grid3 interactive">
+    <div class="panel"><h3>Eduard Stan</h3><p><a href="https://www.linkedin.com/in/eduard-g-stan/" target="_blank" rel="noopener">linkedin.com/in/eduard-g-stan</a></p></div>
+    <div class="panel"><h3>Oana Sîrbu</h3><p><a href="https://www.linkedin.com/in/oanasirbu/" target="_blank" rel="noopener">linkedin.com/in/oanasirbu</a></p></div>
+    <div class="panel"><h3>Luiza Adelina Ciucu</h3><p><a href="https://www.linkedin.com/in/luiza-adelina-ciucu-44872b195/" target="_blank" rel="noopener">linkedin.com/in/luiza-adelina-ciucu</a></p></div>
+  </div>
+  <p class="muted" style="margin-top:2.4vh">Add us, and add each other: questions about the project, the field or careers are always welcome.</p>
+</section>
+
+<section class="slide divider" data-notes="Leave up during lab setup.">
+  <div class="num">Thank you</div>
+  <h1>Let's put a price on every mistake</h1>
+  <p class="muted" style="margin-top:2.4vh">Oana Sîrbu — Data Scientist at Dell Technologies</p>
+</section>
+
+</div>
+
+<div id="bar"></div>
+<div id="count"></div>
+<div id="hint">→ / Space next · ← back · F fullscreen · S notes</div>
+<div id="hdr"><span><b>Module 2</b> · Fraud detection</span><span id="hdrPart"></span></div>
+<div id="ftr">Oana Sîrbu · Data Scientist at Dell Technologies</div>
+<div id="notes"></div>
+
+<script>
+(function(){
+  /* ---------- slide engine ---------- */
+  var slides=[].slice.call(document.querySelectorAll('.slide')),i=0;
+  var bar=document.getElementById('bar'),count=document.getElementById('count'),notes=document.getElementById('notes');
+  var partOf=[],cur='Introduction',secNo=0;
+  slides[0].classList.add('cover');
+  slides.forEach(function(s,n){
+    var num=s.querySelector('.divider .num, .num');
+    if(n>0&&s.classList.contains('divider')&&num){
+      var m=num.textContent.match(/^Part (\d+)\s*—\s*(.*)$/);
+      var mark=document.createElement('div');
+      if(m){mark.className='sec';mark.textContent=('0'+m[1]).slice(-2);cur='Part '+m[1]+' · '+m[2];}
+      else{mark.className='rule';cur='Wrap-up';}
+      s.insertBefore(mark,s.firstChild);
+    }
+    partOf[n]=cur;
+  });
+  var hdr=document.getElementById('hdr'),hdrPart=document.getElementById('hdrPart'),ftr=document.getElementById('ftr'),hint=document.getElementById('hint');
+  function render(){
+    slides.forEach(function(s,n){s.classList.toggle('active',n===i);});
+    hdrPart.textContent=partOf[i];hdr.classList.toggle('hide',i===0);ftr.classList.toggle('hide',i===0);
+    hint.style.display=i===0?'block':'none';
+    bar.style.width=(i/(slides.length-1)*100)+'%';
+    count.textContent=(i+1)+' / '+slides.length;
+    notes.innerHTML=slides[i].getAttribute('data-notes')||'<i>No notes.</i>';
+    if(history.replaceState) history.replaceState(null,'','#'+(i+1));
+  }
+  function go(n){i=Math.max(0,Math.min(slides.length-1,n));render();}
+  function isField(el){return el&&/^(INPUT|TEXTAREA|BUTTON|SELECT)$/.test(el.tagName);}
+  document.addEventListener('keydown',function(e){
+    var k=e.key;
+    if((k==='ArrowRight'||k==='ArrowLeft')&&isField(document.activeElement)) return; // let widgets use arrows
+    if(k==='ArrowRight'||k===' '||k==='PageDown'){e.preventDefault();go(i+1);}
+    else if(k==='ArrowLeft'||k==='PageUp'){e.preventDefault();go(i-1);}
+    else if(k==='Home'){e.preventDefault();go(0);}
+    else if(k==='End'){e.preventDefault();go(slides.length-1);}
+    else if(k==='f'||k==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+    else if(k==='s'||k==='S'){notes.classList.toggle('show');}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.interactive')) return;   // don't advance when using a widget
+    go(i+1);
+  });
+
+  /* ---------- helpers ---------- */
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  function gauss(rng,m,s){var u=1-rng(),v=1-rng();return m+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+  function fmtPct(x){return isFinite(x)?(x*100).toFixed(1)+'%':'—';}
+  function fmtUsd(x){return '$'+Math.round(x).toLocaleString('en-US');}
+  function sigmoid(z){return 1/(1+Math.exp(-z));}
+  var C={trace:'#1f5fd6',alarm:'#d6334a',amber:'#b9770e',muted:'#5b6f8f',ink:'#0b2545',line:'#d4dff0',dim:'#7fa3e0'};
+  function axisText(ctx,t,x,y,col,align){ctx.fillStyle=col||C.muted;ctx.font='12px Consolas,"Cascadia Mono","DejaVu Sans Mono",monospace';ctx.textAlign=align||'left';ctx.fillText(t,x,y);ctx.textAlign='left';}
+
+
+  /* ---------- the five-stage thread (objectives, dividers) ---------- */
+  (function(){
+    var ST=[['Score','features + boosted trees'],['Calibrate','a p that means what it says'],['Decide','p · amount vs. review cost'],
+            ['Guard','drift, late labels, unsupervised net'],['Explain','SHAP reasons and audits']];
+    function build(el,at){
+      el.innerHTML=ST.map(function(s,k){var c=at===0?'':(k+1<at?'done':(k+1===at?'now':''));
+        return (k?'<div class="ar">→</div>':'')+'<div class="st '+c+'"><i>PART '+(k+1)+'</i><b>'+s[0]+'</b><span>'+s[1]+'</span></div>';}).join('');
+    }
+    slides.forEach(function(s){
+      var num=s.querySelector('.num'),m=s.classList.contains('divider')&&num&&num.textContent.match(/^Part (\d+)/);
+      if(m){var el=document.createElement('div');el.className='pipe';s.appendChild(el);build(el,+m[1]);}
+      [].slice.call(s.querySelectorAll('.pipe[data-at]')).forEach(function(el){build(el,+el.getAttribute('data-at'));});
+    });
+  })();
+
+  /* ---------- gradient boosting, one tree at a time ---------- */
+  (function(){
+    var cv=document.getElementById('gbCanvas');if(!cv) return;
+    var ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+    var lc=document.getElementById('gbLoss'),lx=lc.getContext('2d'),LW=lc.width,LH=lc.height;
+    var etaEl=document.getElementById('gbEta'),playBtn=document.getElementById('gbPlay');
+    var ETAS=[0.05,0.1,0.3,0.6,1],MAXM=80,LO=-1.8,HI=2.6;
+    function ptrue(x){return Math.min(.95,.04+.78/(1+Math.exp(-3.2*(x-1.3)))+.4*Math.exp(-Math.pow((x+1.1)/.3,2)));}
+    var rng=mulberry32(11);
+    function gen(n){var a=[];for(var k=0;k<n;k++){var x=LO+(HI-LO)*rng();a.push({x:x,y:rng()<ptrue(x)?1:0,j:rng()});}
+      return a.sort(function(a,b){return a.x-b.x;});}
+    var tr=gen(160),va=gen(3000),xs=tr.map(function(d){return d.x;});
+    var prior=tr.reduce(function(s,d){return s+d.y;},0)/tr.length,F0=Math.log(prior/(1-prior));
+    var eta,trees,Ft,Fv,hist,res,next,busy=false,playing=false,timer=null,gen_=0;
+
+    function loss(d,F){var s=0;for(var k=0;k<d.length;k++){var p=Math.min(1-1e-9,Math.max(1e-9,sigmoid(F[k])));s-=d[k].y?Math.log(p):Math.log(1-p);}return s/d.length;}
+    // depth-2 regression tree on the residuals (least squares), Newton leaf values g/(h+λ)
+    function fitTree(r,h){
+      var n=r.length,S=[0],S2=[0],k;
+      for(k=0;k<n;k++){S.push(S[k]+r[k]);S2.push(S2[k]+r[k]*r[k]);}
+      function sse(lo,hi){var s=S[hi]-S[lo];return S2[hi]-S2[lo]-s*s/(hi-lo);}
+      function best(lo,hi){var b=null,bv=Infinity;for(var q=lo+4;q<=hi-4;q++){if(xs[q]===xs[q-1])continue;var v=sse(lo,q)+sse(q,hi);if(v<bv){bv=v;b=q;}}return b;}
+      var leaves=[[0,n]];
+      for(var d=0;d<2;d++){var nl=[];leaves.forEach(function(L){var q=best(L[0],L[1]);if(q===null)nl.push(L);else nl.push([L[0],q],[q,L[1]]);});leaves=nl;}
+      var t={thr:[],val:[],fit:[]};
+      leaves.forEach(function(L,q){var g=0,hh=0;for(var i=L[0];i<L[1];i++){g+=r[i];hh+=h[i];}
+        if(q>0)t.thr.push((xs[L[0]-1]+xs[L[0]])/2);
+        t.val.push(g/(hh+1));t.fit.push(g/(L[1]-L[0]));});
+      return t;
+    }
+    function leaf(t,x){var q=0;while(q<t.thr.length&&x>=t.thr[q])q++;return q;}
+    function prepNext(){
+      res=Ft.map(function(f,k){return tr[k].y-sigmoid(f);});
+      next=fitTree(res,Ft.map(function(f){var p=sigmoid(f);return p*(1-p);}));
+    }
+    function Fx(x,s){var F=F0;for(var q=0;q<trees.length;q++)F+=eta*trees[q].val[leaf(trees[q],x)];
+      if(s)F+=s*eta*next.val[leaf(next,x)];return F;}
+
+    var L=56,R=W-16,T=24,B=184,ST=208,SB=280;
+    function X(x){return L+(x-LO)/(HI-LO)*(R-L);} function Y(p){return B-p*(B-T);}
+    function YS(v){return (ST+SB)/2-v*(SB-ST)/2;}
+    function draw(s){
+      ctx.clearRect(0,0,W,H);
+      ctx.strokeStyle=C.line;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(L,T-6);ctx.lineTo(L,B);ctx.lineTo(R,B);ctx.stroke();
+      [0,.5,1].forEach(function(v){axisText(ctx,v.toFixed(1),L-30,Y(v)+4);});
+      [[.25,'¼×'],[1,'1×'],[4,'4×'],[12,'12×']].forEach(function(a){var x=X(Math.log(a[0]));
+        ctx.strokeStyle=C.line;ctx.beginPath();ctx.moveTo(x,B);ctx.lineTo(x,B+4);ctx.moveTo(x,SB);ctx.lineTo(x,SB+4);ctx.stroke();axisText(ctx,a[1],x-8,SB+16);});
+      axisText(ctx,'amount ÷ card\'s usual spend (log scale)',L,SB+32);axisText(ctx,'P(fraud)',L+6,T-10);
+      // data
+      tr.forEach(function(d){ctx.fillStyle=d.y?C.alarm:'rgba(31,95,214,.5)';ctx.beginPath();
+        ctx.arc(X(d.x),d.y?Y(1)+3+d.j*9:Y(0)-3-d.j*9,2.6,0,7);ctx.fill();});
+      // truth
+      ctx.setLineDash([5,4]);ctx.strokeStyle=C.muted;ctx.lineWidth=1.3;ctx.beginPath();
+      for(var j=0;j<=220;j++){var x=LO+(HI-LO)*j/220,yy=Y(ptrue(x));j?ctx.lineTo(X(x),yy):ctx.moveTo(X(x),yy);}ctx.stroke();ctx.setLineDash([]);
+      // model
+      ctx.strokeStyle=C.ink;ctx.lineWidth=2.8;ctx.beginPath();
+      for(j=0;j<=220;j++){x=LO+(HI-LO)*j/220;yy=Y(sigmoid(Fx(x,s)));j?ctx.lineTo(X(x),yy):ctx.moveTo(X(x),yy);}ctx.stroke();
+      axisText(ctx,'card testing',X(-1.1)-36,Y(.5)-6,C.muted);
+      axisText(ctx,'far above usual',X(1.9)-70,Y(.6),C.muted);
+      ctx.fillStyle=C.ink;ctx.fillRect(R-232,T-14,18,3);axisText(ctx,'model p = σ(F_m)',R-208,T-9,C.ink);
+      ctx.setLineDash([5,4]);ctx.strokeStyle=C.muted;ctx.beginPath();ctx.moveTo(R-74,T-12);ctx.lineTo(R-56,T-12);ctx.stroke();ctx.setLineDash([]);
+      axisText(ctx,'truth',R-50,T-9);
+      // residual strip
+      ctx.fillStyle='#f3f7fd';ctx.fillRect(L,ST,R-L,SB-ST);
+      ctx.strokeStyle=C.line;ctx.beginPath();ctx.moveTo(L,YS(0));ctx.lineTo(R,YS(0));ctx.stroke();
+      axisText(ctx,'+1',L-24,YS(1)+8);axisText(ctx,'0',L-16,YS(0)+4);axisText(ctx,'−1',L-24,YS(-1));
+      axisText(ctx,'residuals y − p: what is still wrong',L+6,ST-7);
+      axisText(ctx,'next tree h',R-150,ST-7,C.amber);
+      tr.forEach(function(d,k){ctx.fillStyle=d.y?'rgba(214,51,74,.55)':'rgba(31,95,214,.4)';ctx.beginPath();ctx.arc(X(d.x),YS(res[k]),2,0,7);ctx.fill();});
+      var edges=[LO].concat(next.thr,[HI]);
+      ctx.strokeStyle=C.amber;ctx.lineWidth=s?3.4:2.6;ctx.beginPath();
+      next.fit.forEach(function(v,q){var y=YS(v);q?ctx.lineTo(X(edges[q]),y):ctx.moveTo(X(edges[q]),y);ctx.lineTo(X(edges[q+1]),y);});ctx.stroke();
+      // readouts
+      var m=trees.length,h=hist[hist.length-1];
+      document.getElementById('gbM').textContent=s?m+' → '+(m+1):m;
+      document.getElementById('gbTr').textContent=h[0].toFixed(3);
+      document.getElementById('gbVa').textContent=h[1].toFixed(3);
+      var bi=0;hist.forEach(function(v,q){if(v[1]<hist[bi][1])bi=q;});
+      document.getElementById('gbBest').textContent=hist[bi][1].toFixed(3)+' at m = '+bi;
+      drawLoss(bi);
+    }
+    function drawLoss(bi){
+      var l=34,r=LW-8,t=10,b=LH-22,lo=.15,hi=.7;
+      function x(m){return l+m/MAXM*(r-l);} function y(v){return b-(Math.min(hi,Math.max(lo,v))-lo)/(hi-lo)*(b-t);}
+      lx.clearRect(0,0,LW,LH);lx.strokeStyle=C.line;lx.lineWidth=1;lx.beginPath();lx.moveTo(l,t);lx.lineTo(l,b);lx.lineTo(r,b);lx.stroke();
+      [.2,.4,.6].forEach(function(v){axisText(lx,v.toFixed(1),l-28,y(v)+4);});
+      [0,40,80].forEach(function(m){axisText(lx,String(m),x(m)-6,b+14);});
+      axisText(lx,'trees →',r-52,b-6);
+      [[0,C.trace],[1,C.alarm]].forEach(function(c){lx.strokeStyle=c[1];lx.lineWidth=2;lx.beginPath();
+        hist.forEach(function(v,m){m?lx.lineTo(x(m),y(v[c[0]])):lx.moveTo(x(m),y(v[c[0]]));});lx.stroke();});
+      lx.setLineDash([3,3]);lx.strokeStyle=C.amber;lx.lineWidth=1.2;lx.beginPath();lx.moveTo(x(bi),t);lx.lineTo(x(bi),b);lx.stroke();lx.setLineDash([]);
+      axisText(lx,'train',l+6,t+10,C.trace);axisText(lx,'held-out',l+48,t+10,C.alarm);
+    }
+    function step(done){
+      if(busy||trees.length>=MAXM){if(done)done();return;}
+      busy=true;var g=gen_,t0=performance.now(),dur=playing?260:520;
+      function frame(now){
+        if(g!==gen_) return;
+        var s=Math.min(1,(now-t0)/dur);draw(s);
+        if(s<1){requestAnimationFrame(frame);return;}
+        trees.push(next);
+        for(var k=0;k<tr.length;k++)Ft[k]+=eta*next.val[leaf(next,xs[k])];
+        for(k=0;k<va.length;k++)Fv[k]+=eta*next.val[leaf(next,va[k].x)];
+        hist.push([loss(tr,Ft),loss(va,Fv)]);prepNext();busy=false;draw(0);if(done)done();
+      }
+      requestAnimationFrame(frame);
+    }
+    function stop(){playing=false;clearTimeout(timer);playBtn.textContent='▶ play';playBtn.classList.remove('on');}
+    function loop(){if(!playing)return;if(trees.length>=MAXM){stop();return;}step(function(){timer=setTimeout(loop,60);});}
+    function reset(){
+      stop();gen_++;busy=false;eta=ETAS[+etaEl.value];
+      document.getElementById('gbEtaV').textContent=eta;
+      trees=[];Ft=tr.map(function(){return F0;});Fv=va.map(function(){return F0;});
+      hist=[[loss(tr,Ft),loss(va,Fv)]];prepNext();draw(0);
+    }
+    document.getElementById('gbStep').addEventListener('click',function(){stop();step();});
+    playBtn.addEventListener('click',function(){if(playing){stop();return;}playing=true;playBtn.textContent='❚❚ pause';playBtn.classList.add('on');loop();});
+    document.getElementById('gbReset').addEventListener('click',reset);
+    etaEl.addEventListener('input',reset);
+    reset();
+  })();
+
+  /* ---------- ask-the-room cards ---------- */
+  [].slice.call(document.querySelectorAll('.scenario')).forEach(function(card){
+    var ans=card.dataset.answer,st=card.querySelector('.qstatus'),btns=[].slice.call(card.querySelectorAll('.choices button'));
+    var rs=document.createElement('button');rs.className='qreset';rs.textContent='↺ reset';st.parentNode.appendChild(rs);
+    function reset(){btns.forEach(function(x){x.classList.remove('correct','wrong','dim');});st.textContent='';st.className='qstatus';rs.style.display='none';}
+    btns.forEach(function(b){
+      b.addEventListener('click',function(){
+        var ok=b.dataset.type===ans;
+        btns.forEach(function(x){x.classList.remove('correct','wrong','dim');
+          if(x.dataset.type===ans)x.classList.add('correct');else if(x!==b)x.classList.add('dim');});
+        if(!ok)b.classList.add('wrong');
+        st.textContent=ok?card.dataset.ok:('Not quite. '+card.dataset.no+'  →  '+card.dataset.ok);
+        st.className='qstatus '+(ok?'good':'bad');rs.style.display='inline-block';
+      });
+    });
+    rs.addEventListener('click',reset);
+  });
+
+  /* ---------- drift widget ---------- */
+  (function(){
+    var cv=document.getElementById('drCanvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+    var rng=mulberry32(11),legit=[],k;
+    for(k=0;k<700;k++){var h=((gauss(rng,14,4.2)%24)+24)%24;legit.push([h,gauss(rng,-0.3,0.85)]);}
+    var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    function frauds(m){
+      var r=mulberry32(100+m),out=[],pB=Math.max(0,Math.min(1,(m-17)/3))*0.85;
+      for(var j=0;j<45;j++){
+        if(r()>=pB){out.push([((gauss(r,1,1.6)%24)+24)%24,gauss(r,2.6,0.6),0]);}
+        else{out.push([gauss(r,12.5,1.8),gauss(r,1.0,0.45),1]);}
+      }
+      return out;
+    }
+    function caught(p){var night=(p[0]>=21||p[0]<5);return night&&p[1]>1.3;}
+    function X(h){return 40+h/24*(W-60);} function Y(v){return H-30-(v+3)/8.5*(H-50);}
+    function draw(m){
+      ctx.clearRect(0,0,W,H);
+      // learned region (frozen model): night & ratio > 1.3
+      ctx.fillStyle='rgba(185,119,14,0.10)';ctx.strokeStyle='rgba(185,119,14,0.6)';ctx.setLineDash([4,4]);
+      [[0,5],[21,24]].forEach(function(r){ctx.fillRect(X(r[0]),Y(5.5),X(r[1])-X(r[0]),Y(1.3)-Y(5.5));ctx.strokeRect(X(r[0]),Y(5.5),X(r[1])-X(r[0]),Y(1.3)-Y(5.5));});
+      ctx.setLineDash([]);
+      axisText(ctx,'learned in 2019: "night + amount far above usual"',X(5.3),Y(5.1),C.amber);
+      var fp=0;
+      legit.forEach(function(p){var c=caught(p);if(c)fp++;ctx.fillStyle=c?'rgba(185,119,14,0.9)':'rgba(31,95,214,0.35)';ctx.fillRect(X(p[0])-1.5,Y(p[1])-1.5,3,3);});
+      var fr=frauds(m),hit=0,nb=0;
+      fr.forEach(function(p){var c=caught(p);if(c)hit++;if(p[2])nb++;ctx.fillStyle=c?C.alarm:'rgba(214,51,74,0.35)';
+        ctx.beginPath();ctx.arc(X(p[0]),Y(p[1]),c?4.5:4,0,6.283);ctx.fill();
+        if(!c){ctx.strokeStyle=C.alarm;ctx.lineWidth=1.2;ctx.stroke();}});
+      // axes
+      ctx.strokeStyle=C.line;ctx.beginPath();ctx.moveTo(40,H-30);ctx.lineTo(W-20,H-30);ctx.stroke();
+      [0,6,12,18,24].forEach(function(h){axisText(ctx,h+'h',X(h)-8,H-12);});
+      axisText(ctx,'amount ÷ card average (log₂)',44,16);
+      axisText(ctx,'legit',W-280,16,C.trace);axisText(ctx,'fraud caught',W-230,16,C.alarm);axisText(ctx,'○ fraud missed',W-125,16,C.alarm);
+      document.getElementById('drMonth').textContent=MONTHS[m%12]+' '+(2019+Math.floor(m/12));
+      var rec=hit/fr.length,re=document.getElementById('drRec');re.textContent=fmtPct(rec);re.className=rec>0.6?'good':'bad';
+      document.getElementById('drNew').textContent=fmtPct(nb/fr.length);
+      document.getElementById('drFP').textContent=fp+' / '+legit.length;
+    }
+    var r=document.getElementById('drRange');r.addEventListener('input',function(){draw(+r.value);});draw(+r.value);
+  })();
+
+  /* ---------- SMOTE widget ---------- */
+  (function(){
+    var cv=document.getElementById('smCanvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+    var legit=[],fraud=[],synth=[],k,rng=mulberry32(5);
+    for(k=0;k<520;k++)legit.push([gauss(rng,0.5,0.17),gauss(rng,0.5,0.2)]);
+    for(k=0;k<6;k++)fraud.push([gauss(rng,0.1,0.03),gauss(rng,0.22,0.05)]);
+    for(k=0;k<6;k++)fraud.push([gauss(rng,0.9,0.03),gauss(rng,0.8,0.05)]);
+    for(k=0;k<4;k++)fraud.push([gauss(rng,0.5,0.15),gauss(rng,0.5,0.15)]);   // genuinely overlapping frauds
+    function d2(a,b){var dx=a[0]-b[0],dy=a[1]-b[1];return dx*dx+dy*dy;}
+    function knn(p,set,kk,self){return set.map(function(q,j){return [d2(p,q),j];}).filter(function(x){return x[1]!==self;})
+      .sort(function(a,b){return a[0]-b[0];}).slice(0,kk).map(function(x){return x[1];});}
+    var NB=fraud.map(function(p,j){return knn(p,fraud,5,j);});
+    function inLegit(p){ // majority of its 9 nearest REAL points are legit
+      var all=legit.map(function(q){return [d2(p,q),0];}).concat(fraud.map(function(q){return [d2(p,q),1];}))
+        .sort(function(a,b){return a[0]-b[0];}).slice(0,9);
+      return all.filter(function(x){return x[1]===0;}).length>=5;}
+    function X(x){return 20+x*(W-40);} function Y(y){return H-15-y*(H-30);}
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      legit.forEach(function(p){ctx.fillStyle='rgba(31,95,214,0.35)';ctx.fillRect(X(p[0])-1.5,Y(p[1])-1.5,3,3);});
+      synth.forEach(function(s){ctx.strokeStyle='rgba(185,119,14,0.18)';ctx.beginPath();ctx.moveTo(X(s.a[0]),Y(s.a[1]));ctx.lineTo(X(s.b[0]),Y(s.b[1]));ctx.stroke();});
+      synth.forEach(function(s){ctx.fillStyle=s.bad?C.alarm:C.amber;ctx.beginPath();ctx.arc(X(s.p[0]),Y(s.p[1]),3,0,6.283);ctx.fill();
+        if(s.bad){ctx.strokeStyle='#fff';ctx.lineWidth=.8;ctx.stroke();}});
+      fraud.forEach(function(p){ctx.fillStyle=C.alarm;ctx.beginPath();ctx.arc(X(p[0]),Y(p[1]),5,0,6.283);ctx.fill();});
+      axisText(ctx,'legit',W-290,16,C.trace);axisText(ctx,'real fraud',W-235,16,C.alarm);axisText(ctx,'SMOTE fraud',W-145,16,C.amber);
+      var bad=synth.filter(function(s){return s.bad;}).length;
+      document.getElementById('smN').textContent=synth.length;
+      document.getElementById('smBad').textContent=synth.length?fmtPct(bad/synth.length):'—';
+    }
+    var r2=mulberry32(77);
+    document.getElementById('smRun').addEventListener('click',function(){
+      for(var t=0;t<40;t++){var a=Math.floor(r2()*fraud.length),b=NB[a][Math.floor(r2()*5)],lam=r2();
+        var p=[fraud[a][0]+lam*(fraud[b][0]-fraud[a][0]),fraud[a][1]+lam*(fraud[b][1]-fraud[a][1])];
+        synth.push({p:p,a:fraud[a],b:fraud[b],bad:inLegit(p)});}
+      draw();});
+    document.getElementById('smReset').addEventListener('click',function(){synth=[];draw();});
+    draw();
+  })();
+
+  /* ---------- class-weight distortion ---------- */
+  (function(){
+    var cv=document.getElementById('wCanvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+    var L=50,R=W-15,T=15,B=H-35;
+    function X(lp){return L+(lp+4)/4*(R-L);} function Y(v){return B-v*(B-T);}
+    function pw(p,w){return w*p/(w*p+1-p);}
+    function draw(w){
+      ctx.clearRect(0,0,W,H);
+      ctx.strokeStyle=C.line;ctx.beginPath();ctx.moveTo(L,T);ctx.lineTo(L,B);ctx.lineTo(R,B);ctx.stroke();
+      [-4,-3,-2,-1,0].forEach(function(e){axisText(ctx,e===0?'1':'1e'+e,X(e)-10,B+16);});
+      [0,0.5,1].forEach(function(v){axisText(ctx,v.toFixed(1),L-30,Y(v)+4);});
+      axisText(ctx,'true P(fraud) (log)',R-130,B+30);axisText(ctx,'reported p_w',L+6,T+10);
+      function curve(f,col,lw){ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.beginPath();
+        for(var j=0;j<=200;j++){var lp=-4+4*j/200,p=Math.pow(10,lp),x=X(lp),y=Y(f(p));j?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();}
+      curve(function(p){return p;},C.muted,1.2);
+      curve(function(p){return pw(p,w);},C.alarm,2.5);
+      ctx.setLineDash([4,4]);ctx.strokeStyle=C.amber;ctx.lineWidth=1.2;
+      ctx.beginPath();ctx.moveTo(L,Y(0.5));ctx.lineTo(R,Y(0.5));ctx.stroke();
+      var t=1/(1+w);ctx.beginPath();ctx.moveTo(X(Math.log10(t)),Y(0.5));ctx.lineTo(X(Math.log10(t)),B);ctx.stroke();ctx.setLineDash([]);
+      axisText(ctx,'identity (calibrated)',X(-1.7),Y(0.1),C.muted);
+      axisText(ctx,'weighted model',X(-3.9),Y(0.9),C.alarm);
+      document.getElementById('wVal').textContent=w.toFixed(0);
+      document.getElementById('wThr').textContent=fmtPct(t).replace('%',' %');
+      document.getElementById('wRep').textContent=fmtPct(pw(0.005,w));
+    }
+    var r=document.getElementById('wRange');
+    function wv(){return Math.pow(10,+r.value/100);}   // 1 .. 1000
+    r.addEventListener('input',function(){draw(wv());});draw(wv());
+  })();
+
+  /* ---------- shared simulated transactions (calibrated by construction) ---------- */
+  var SIM=(function(){
+    var rng=mulberry32(2024),N=20000,p=[],amt=[],y=[],k;
+    // log-amount ~ N(4, 1.3); fraud risk rises with amount; label ~ Bernoulli(p)  =>  p is calibrated
+    for(k=0;k<N;k++){var la=gauss(rng,4.0,1.3),lg=-11.5+2.2*(la-4)+gauss(rng,0,3.4),pp=sigmoid(lg);
+      p.push(pp);amt.push(Math.exp(la));y.push(rng()<pp?1:0);}
+    return {N:N,p:p,amt:amt,y:y};
+  })();
+  function simCost(flagFn,cinv){var c=0,tp=0,fp=0,fn=0,dol=0,dTot=0;
+    for(var k=0;k<SIM.N;k++){var f=flagFn(k);if(f){c+=cinv;if(SIM.y[k])tp++;else fp++;}else if(SIM.y[k]){c+=SIM.amt[k];fn++;}
+      if(SIM.y[k]){dTot+=SIM.amt[k];if(f)dol+=SIM.amt[k];}}
+    var prec=(tp+fp)?tp/(tp+fp):0,rec=(tp+fn)?tp/(tp+fn):0;
+    return {cost:c,f1:(prec&&rec)?2*prec*rec/(prec+rec):0,alerts:tp+fp,rec:rec,drec:dTot?dol/dTot:0};}
+
+  /* ---------- Bayes boundary in (amount, p) ---------- */
+  (function(){
+    var cv=document.getElementById('bCanvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+    var L=55,R=W-45,T=34,B=H-34,show=[],rng=mulberry32(9),k;
+    for(k=0;k<SIM.N;k++){if(SIM.y[k]||rng()<0.18)show.push(k);}
+    function X(a){return L+(Math.log10(a))/4*(R-L);} function Y(p){return B-(Math.log10(Math.max(p,1e-6))+6)/6*(B-T);}
+    var r=document.getElementById('bInv');
+    function draw(){
+      var cinv=+r.value;ctx.clearRect(0,0,W,H);
+      ctx.strokeStyle=C.line;ctx.beginPath();ctx.moveTo(L,T);ctx.lineTo(L,B);ctx.lineTo(R,B);ctx.stroke();
+      [0,1,2,3,4].forEach(function(e){axisText(ctx,'$'+Math.pow(10,e).toLocaleString('en-US'),X(Math.pow(10,e))-10,B+16);});
+      [-6,-4,-2,0].forEach(function(e){axisText(ctx,e===0?'1':'1e'+e,L-40,Y(Math.pow(10,e))+4);});
+      axisText(ctx,'transaction amount (log)',R-170,B+30);axisText(ctx,'P(fraud) (log)',8,16);
+      // flagged region shading
+      ctx.fillStyle='rgba(185,119,14,0.07)';ctx.beginPath();ctx.moveTo(X(1),T);
+      for(var j=0;j<=100;j++){var a=Math.pow(10,4*j/100),pp=Math.min(1,cinv/a);ctx.lineTo(X(a),Y(pp));}
+      ctx.lineTo(X(1e4),T);ctx.closePath();ctx.fill();
+      show.forEach(function(k){var f=SIM.p[k]*SIM.amt[k]>cinv,a=Math.min(Math.max(SIM.amt[k],1),1e4);
+        if(SIM.y[k]){ctx.fillStyle=f?C.alarm:'rgba(214,51,74,0.3)';ctx.beginPath();ctx.arc(X(a),Y(SIM.p[k]),3.6,0,6.283);ctx.fill();
+          if(!f){ctx.strokeStyle=C.alarm;ctx.lineWidth=1;ctx.stroke();}}
+        else{ctx.fillStyle=f?'rgba(185,119,14,0.75)':'rgba(31,95,214,0.25)';ctx.fillRect(X(a)-1.2,Y(SIM.p[k])-1.2,2.4,2.4);}});
+      ctx.strokeStyle=C.ink;ctx.lineWidth=2.2;ctx.beginPath();
+      for(j=0;j<=100;j++){a=Math.pow(10,4*j/100);pp=Math.min(1,cinv/a);j?ctx.lineTo(X(a),Y(pp)):ctx.moveTo(X(a),Y(pp));}ctx.stroke();
+      axisText(ctx,'p = C_inv / amt',X(2500),Y(cinv/2500)+22,C.ink);
+      axisText(ctx,'legit (sample)',R-390,16,C.trace);axisText(ctx,'fraud flagged',R-270,16,C.alarm);axisText(ctx,'○ fraud approved',R-150,16,C.alarm);
+      var s=simCost(function(k){return SIM.p[k]*SIM.amt[k]>cinv;},cinv);
+      document.getElementById('bInvV').textContent='$'+cinv;
+      document.getElementById('bAl').textContent=s.alerts;
+      document.getElementById('bRec').textContent=fmtPct(s.rec);
+      document.getElementById('bDr').textContent=fmtPct(s.drec);
+      document.getElementById('bCost').textContent=fmtUsd(s.cost);
+    }
+    r.addEventListener('input',draw);draw();
+  })();
+
+  /* ---------- exact SHAP for a linear logit ---------- */
+  (function(){
+    var cv=document.getElementById('sCanvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+    // f(x) = b0 + sum_j w_j x_j ; features: log10 amount, night (0/1), txns in 24h, log10 km
+    var F=[{n:'amount',w:2.0,mu:1.8},{n:'night hour',w:2.2,mu:0.12},{n:'txns past 24h',w:0.45,mu:1.2},{n:'distance',w:-1.2,mu:1.8}];
+    var BASE=-5.3;   // phi_0 = E[f(X)] (logit of ~0.5 % base rate)
+    var b0=BASE-F.reduce(function(s,f){return s+f.w*f.mu;},0);
+    var PRE={tp:{amt:1801,hr:3,n:3,km:40,y:'fraud'},fp:{amt:618,hr:1,n:1,km:30,y:'legit (night-owl purchase)'},fn:{amt:563,hr:10,n:4,km:900,y:'fraud (new 2020 pattern)'}};
+    var sA=document.getElementById('sAmt'),sH=document.getElementById('sHr'),sN=document.getElementById('sN'),sD=document.getElementById('sD2');
+    function amtOf(v){return Math.round(Math.pow(10,0.5+3.5*v/1000));} function amtTo(a){return Math.round((Math.log10(a)-0.5)/3.5*1000);}
+    function kmOf(v){return Math.round(Math.pow(10,3.5*v/1000));} function kmTo(k){return Math.round(Math.log10(Math.max(k,1))/3.5*1000);}
+    var truth='—';
+    function draw(){
+      var amt=amtOf(+sA.value),hr=+sH.value,n=+sN.value,km=kmOf(+sD.value),night=(hr>=22||hr<=3)?1:0;
+      var x=[Math.log10(amt),night,n,Math.log10(Math.max(km,1))];
+      var phi=F.map(function(f,j){return f.w*(x[j]-f.mu);});
+      var fx=BASE+phi.reduce(function(a,b){return a+b;},0),p=sigmoid(fx);
+      document.getElementById('oAmt').textContent='$'+amt.toLocaleString('en-US');
+      document.getElementById('oHr').textContent=(hr<10?'0':'')+hr+'h'+(night?' ☾':'');
+      document.getElementById('oN').textContent=n;
+      document.getElementById('oD').textContent=km.toLocaleString('en-US')+' km';
+      // waterfall
+      ctx.clearRect(0,0,W,H);
+      var lo=-9,hi=4,L=150,R=W-20;function X(v){return L+(v-lo)/(hi-lo)*(R-L);}
+      var rows=[{lab:'E[f(X)] base',v:BASE,base:true}].concat(F.map(function(f,j){
+        var val=j===0?'$'+amt.toLocaleString('en-US'):j===1?((hr<10?'0':'')+hr+'h'):j===2?String(n):km.toLocaleString('en-US')+' km';
+        return {lab:f.n+' = '+val,v:phi[j]};})).concat([{lab:'f(x) log-odds',v:fx,end:true}]);
+      var rh=(H-40)/rows.length,acc=BASE;
+      ctx.strokeStyle=C.line;ctx.beginPath();ctx.moveTo(L,10);ctx.lineTo(L,H-28);ctx.stroke();
+      [-8,-6,-4,-2,0,2,4].forEach(function(t){ctx.strokeStyle='rgba(212,223,240,0.6)';ctx.beginPath();ctx.moveTo(X(t),10);ctx.lineTo(X(t),H-28);ctx.stroke();axisText(ctx,String(t),X(t)-5,H-12);});
+      // Bayes threshold line in log-odds
+      var pt=Math.min(0.999,15/amt),lt=Math.log(pt/(1-pt));
+      ctx.setLineDash([5,4]);ctx.strokeStyle=C.amber;ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(X(lt),10);ctx.lineTo(X(lt),H-28);ctx.stroke();ctx.setLineDash([]);
+      axisText(ctx,'Bayes threshold',Math.min(X(lt)+4,R-100),H-30,C.amber);
+      rows.forEach(function(r,j){
+        var y0=12+j*rh,hgt=rh*0.62;
+        axisText(ctx,r.lab,L-8,y0+hgt*0.75,C.ink,'right');
+        if(r.base||r.end){ctx.fillStyle=r.end?(p>pt?C.alarm:C.trace):C.muted;ctx.fillRect(Math.min(X(0),X(r.v)),y0,Math.abs(X(r.v)-X(0)),hgt);
+          axisText(ctx,r.v.toFixed(2),X(r.v)+(r.v<0?-42:6),y0+hgt*0.75,C.ink);return;}
+        var a=acc,b=acc+r.v;acc=b;
+        ctx.fillStyle=r.v>=0?C.alarm:'#1f5fd6';ctx.fillRect(X(Math.min(a,b)),y0,Math.max(2,Math.abs(X(b)-X(a))),hgt);
+        axisText(ctx,(r.v>=0?'+':'')+r.v.toFixed(2),X(Math.max(a,b))+6,y0+hgt*0.75,r.v>=0?C.alarm:'#1f5fd6');
+      });
+      document.getElementById('sP').textContent=fmtPct(p);
+      document.getElementById('sT').textContent=fmtPct(pt);
+      var d=document.getElementById('sD');d.textContent=p>pt?'REVIEW':'approve';d.className=p>pt?'bad':'good';
+      document.getElementById('sY').textContent=truth;
+    }
+    function preset(k){var q=PRE[k];sA.value=amtTo(q.amt);sH.value=q.hr;sN.value=q.n;sD.value=kmTo(q.km);truth=q.y;
+      document.querySelectorAll('[data-preset]').forEach(function(b){b.classList.toggle('on',b.dataset.preset===k);});draw();}
+    document.querySelectorAll('[data-preset]').forEach(function(b){b.addEventListener('click',function(){preset(b.dataset.preset);});});
+    [sA,sH,sN,sD].forEach(function(s){s.addEventListener('input',function(){truth='— (edited)';
+      document.querySelectorAll('[data-preset]').forEach(function(b){b.classList.remove('on');});draw();});});
+    preset('tp');
+  })();
+
+  var h=parseInt((location.hash||'').slice(1),10);
+  if(h>0) i=Math.min(slides.length-1,h-1);
+  render();
+})();
+</script>
+</body>
+</html>
